@@ -55,9 +55,17 @@ document.getElementById('encryptForm').addEventListener('submit', async (e) => {
 document.getElementById('decryptForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    const file = document.getElementById('decryptFile').files[0];
+    const publicKey = document.getElementById('decryptKey').value;
+    
+    if (!file || !publicKey) {
+        alert('Please select a file and enter the public key');
+        return;
+    }
+    
     const formData = new FormData();
-    formData.append('file', document.getElementById('decryptFile').files[0]);
-    formData.append('public_key', document.getElementById('decryptKey').value);
+    formData.append('file', file);
+    formData.append('public_key', publicKey.trim());
     
     try {
         const response = await fetch('/decrypt', {
@@ -70,14 +78,14 @@ document.getElementById('decryptForm').addEventListener('submit', async (e) => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'decrypted_' + document.getElementById('decryptFile').files[0].name;
+            a.download = 'decrypted_' + file.name;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             a.remove();
         } else {
             const error = await response.json();
-            throw new Error(error.error);
+            throw new Error(error.error || 'Failed to decrypt file');
         }
     } catch (error) {
         alert('Error decrypting file: ' + error.message);

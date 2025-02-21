@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, send_file, jsonify
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP
 from Cryptodome.Hash import SHA256
-import os
 import io
 
 app = Flask(__name__)
@@ -56,30 +55,59 @@ def encrypt_file():
 
 @app.route('/decrypt', methods=['POST'])
 def decrypt_file():
-    if 'file' not in request.files or 'public_key' not in request.form:
-        return jsonify({'error': 'Missing file or public key'}), 400
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    if 'public_key' not in request.form:
+        return jsonify({'error': 'No public key provided'}), 400
     
     file = request.files['file']
+    if not file.filename:
+        return jsonify({'error': 'Empty file selected'}), 400
+    
     public_key_pem = request.form['public_key']
+    if not public_key_pem.strip():
+        return jsonify({'error': 'Empty public key'}), 400
     
     try:
         # Load public key
         public_key = RSA.import_key(public_key_pem)
         cipher = PKCS1_OAEP.new(public_key, hashAlgo=SHA256)
         
-        # Read and decrypt file
-        encrypted_data = file.read()
-        decrypted_data = cipher.decrypt(encrypted_data)
+        # Read file in chunks to handle memory efficiently
+        chunk_size = 8192  # 8KB chunks
+        encrypted_data = b''
+        print(dir(file))
+        while True:
+            chunk = file.read(chunk_size)
+            if not chunk:
+                break
+            encrypted_data += chunk
         
+        if not encrypted_data:
+            return jsonify({'error': 'File is empty'}), 400
+
+        # Decrypt the data
+        try:
+            decrypted_data = cipher.decrypt(encrypted_data)
+        except ValueError as ve:
+            return jsonify({'error': f'Decryption failed: Invalid data format'}), 400
+        except Exception as de:
+            return jsonify({'error': f'Decryption process failed: {str(de)}'}), 400
+
         # Create response with decrypted data
+        memory_file = io.BytesIO(decrypted_data)
+        memory_file.seek(0)
+        
         return send_file(
-            io.BytesIO(decrypted_data),
+            memory_file,
             mimetype='application/octet-stream',
             as_attachment=True,
             download_name=f'decrypted_{file.filename}'
         )
+    except ValueError as ve:
+        return jsonify({'error': f'Invalid key format: {str(ve)}'}), 400
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'error': f'Decryption failed: {str(e)}'}), 400
 
 @app.errorhandler(404)
 def page_not_found(error):
