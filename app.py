@@ -6,10 +6,6 @@ import os
 import io
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-
-# Ensure upload directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 @app.route('/')
 def home():
