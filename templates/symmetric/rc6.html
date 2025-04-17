@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}RC6 Encryption{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">RC6 Encryption</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Generate RC6 Key</h2>
+                    <div class="mb-3">
+                        <label for="keyLength" class="form-label">Key Length (bits):</label>
+                        <select class="form-select" id="keyLength">
+                            <option value="128">128 bits</option>
+                            <option value="192">192 bits</option>
+                            <option value="256" selected>256 bits</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <button id="generateKey" class="btn btn-primary">Generate Key</button>
+                    </div>
+                    <div id="keyOutput" class="d-none">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Secret Key (Base64):</strong></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="secretKey" readonly>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="copyToClipboard('secretKey')">Copy</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Initialization Vector (IV):</strong></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="iv" readonly>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="copyToClipboard('iv')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Encrypt File with RC6</h2>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label for="encryptFile" class="form-label">Select File to Encrypt:</label>
+                            <input class="form-control" type="file" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="encryptKey" class="form-label">Secret Key (Base64):</label>
+                            <input type="text" class="form-control" id="encryptKey" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="encryptIV" class="form-label">Initialization Vector (IV):</label>
+                            <input type="text" class="form-control" id="encryptIV" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Encrypt File</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Decrypt File with RC6</h2>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label for="decryptFile" class="form-label">Select Encrypted File:</label>
+                            <input class="form-control" type="file" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="decryptKey" class="form-label">Secret Key (Base64):</label>
+                            <input type="text" class="form-control" id="decryptKey" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="decryptIV" class="form-label">Initialization Vector (IV):</label>
+                            <input type="text" class="form-control" id="decryptIV" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Decrypt File</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5 mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">About RC6</h2>
+                    <p class="card-text">
+                        RC6 is a symmetric key block cipher derived from RC5. It was designed by Ron Rivest, Matt
+                        Robshaw, Ray Sidney, and Yiqun Lisa Yin to meet the requirements of the Advanced Encryption
+                        Standard (AES) competition. Although it was a finalist in the AES competition, it was not
+                        selected as the standard.
+                    </p>
+                    <h3>Key Features:</h3>
+                    <ul>
+                        <li><strong>Block Size:</strong> 128 bits</li>
+                        <li><strong>Key Size:</strong> Variable (128, 192, or 256 bits)</li>
+                        <li><strong>Rounds:</strong> 20</li>
+                        <li><strong>Structure:</strong> Feistel-like network with data-dependent rotations</li>
+                        <li><strong>Operations:</strong> Integer addition, XOR, and data-dependent rotations</li>
+                    </ul>
+                    <h3>Advantages:</h3>
+                    <ul>
+                        <li>Fast performance on 32-bit processors</li>
+                        <li>Simple design with strong security properties</li>
+                        <li>Flexible key size options</li>
+                        <li>Data-dependent rotations provide good diffusion</li>
+                    </ul>
+                    <h3>Disadvantages:</h3>
+                    <ul>
+                        <li>Patented (though now free to use)</li>
+                        <li>Not as widely implemented as AES</li>
+                        <li>Requires more computational resources than some other ciphers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('generateKey').addEventListener('click', async () => {
+        try {
+            const keyLength = document.getElementById('keyLength').value;
+            const response = await fetch('/generate-rc6-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key_length: keyLength })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('secretKey').value = data.key;
+            document.getElementById('iv').value = data.iv;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating key: ' + error.message);
+        }
+    });
+
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        element.select();
+        document.execCommand('copy');
+        alert('Copied to clipboard!');
+    }
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('file', document.getElementById('encryptFile').files[0]);
+        formData.append('key', document.getElementById('encryptKey').value.trim());
+        formData.append('iv', document.getElementById('encryptIV').value.trim());
+
+        try {
+            const response = await fetch('/symmetric/rc6/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'rc6_encrypted_' + document.getElementById('encryptFile').files[0].name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('decryptFile').files[0];
+        const key = document.getElementById('decryptKey').value.trim();
+        const iv = document.getElementById('decryptIV').value.trim();
+
+        if (!file || !key || !iv) {
+            alert('Please select a file and enter the key and IV');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+        formData.append('iv', iv);
+
+        try {
+            const response = await fetch('/symmetric/rc6/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('rc6_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

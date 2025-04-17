@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}NTRU Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">NTRU Encryption</h1>
+                <p class="lead">NTRU is a lattice-based asymmetric encryption algorithm that is believed to be resistant to quantum computer attacks.</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Generate NTRU Keys</h2>
+                        <div class="mb-3">
+                            <label for="parameterSet" class="form-label">Parameter Set:</label>
+                            <select class="form-select" id="parameterSet">
+                                <option value="ntru-hps2048509">NTRU-HPS-2048-509 (NIST Level 1)</option>
+                                <option value="ntru-hps2048677" selected>NTRU-HPS-2048-677 (NIST Level 3)</option>
+                                <option value="ntru-hps4096821">NTRU-HPS-4096-821 (NIST Level 5)</option>
+                                <option value="ntru-hrss701">NTRU-HRSS-701 (NIST Level 3)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <button id="generateKeys" class="btn btn-primary">Generate Keys</button>
+                        </div>
+                        <div id="keyOutput" class="d-none">
+                            <div class="mb-3">
+                                <label class="form-label">Private Key (Keep this secure!)</label>
+                                <div class="key-text border rounded p-2" id="privateKey"></div>
+                                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Public Key (Share this)</label>
+                                <div class="key-text border rounded p-2" id="publicKey"></div>
+                                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">About NTRU Parameters</h2>
+                        <p>NTRU security is determined by its parameter sets:</p>
+                        <ul>
+                            <li><strong>NTRU-HPS-2048-509:</strong> NIST Level 1 security (equivalent to AES-128)</li>
+                            <li><strong>NTRU-HPS-2048-677:</strong> NIST Level 3 security (equivalent to AES-192)</li>
+                            <li><strong>NTRU-HPS-4096-821:</strong> NIST Level 5 security (equivalent to AES-256)</li>
+                            <li><strong>NTRU-HRSS-701:</strong> NIST Level 3 security with different tradeoffs</li>
+                        </ul>
+                        <p>Higher security levels provide stronger protection but require more computational resources.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Encrypt File with NTRU</h2>
+                        <form id="encryptForm">
+                            <div class="mb-3">
+                                <label for="encryptFile" class="form-label">Select File to Encrypt:</label>
+                                <input class="form-control" type="file" id="encryptFile" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="encryptKey" class="form-label">Recipient's Public Key:</label>
+                                <textarea class="form-control" id="encryptKey" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="encryptParameterSet" class="form-label">Parameter Set:</label>
+                                <select class="form-select" id="encryptParameterSet">
+                                    <option value="ntru-hps2048509">NTRU-HPS-2048-509 (NIST Level 1)</option>
+                                    <option value="ntru-hps2048677" selected>NTRU-HPS-2048-677 (NIST Level 3)</option>
+                                    <option value="ntru-hps4096821">NTRU-HPS-4096-821 (NIST Level 5)</option>
+                                    <option value="ntru-hrss701">NTRU-HRSS-701 (NIST Level 3)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Decrypt File with NTRU</h2>
+                        <form id="decryptForm">
+                            <div class="mb-3">
+                                <label for="decryptFile" class="form-label">Select Encrypted File:</label>
+                                <input class="form-control" type="file" id="decryptFile" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="decryptKey" class="form-label">Your Private Key:</label>
+                                <textarea class="form-control" id="decryptKey" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="decryptParameterSet" class="form-label">Parameter Set:</label>
+                                <select class="form-select" id="decryptParameterSet">
+                                    <option value="ntru-hps2048509">NTRU-HPS-2048-509 (NIST Level 1)</option>
+                                    <option value="ntru-hps2048677" selected>NTRU-HPS-2048-677 (NIST Level 3)</option>
+                                    <option value="ntru-hps4096821">NTRU-HPS-4096-821 (NIST Level 5)</option>
+                                    <option value="ntru-hrss701">NTRU-HRSS-701 (NIST Level 3)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About NTRU Encryption</h4>
+                    <p>NTRU (Nth-degree TRUncated polynomial ring) is a lattice-based public key cryptosystem that was first proposed in 1996 by mathematicians Jeffrey Hoffstein, Jill Pipher, and Joseph H. Silverman.</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Post-Quantum Security:</strong> NTRU is believed to be resistant to attacks by quantum computers, unlike RSA and ECC</li>
+                        <li><strong>Efficiency:</strong> NTRU operations are typically faster than RSA for equivalent security levels</li>
+                        <li><strong>Standardization:</strong> NTRU is standardized in IEEE 1363.1 and is a finalist in NIST's post-quantum cryptography standardization process</li>
+                        <li><strong>Maturity:</strong> With over 25 years of cryptanalysis, NTRU is one of the most well-studied post-quantum algorithms</li>
+                    </ul>
+                    
+                    <h5>How it Works:</h5>
+                    <p>NTRU is based on the mathematical problem of finding short vectors in lattices, which is believed to be hard even for quantum computers. The algorithm operates in a polynomial ring and uses polynomial multiplication and division for its operations.</p>
+                    
+                    <ol>
+                        <li><strong>Key Generation:</strong> Creates a private key (f, g) and a public key h = g/f in the polynomial ring</li>
+                        <li><strong>Encryption:</strong> Uses the public key to encrypt a message by adding "noise" that only the private key can remove</li>
+                        <li><strong>Decryption:</strong> Uses the private key to remove the noise and recover the original message</li>
+                    </ol>
+                    
+                    <h5>Hybrid Encryption:</h5>
+                    <p>Like most public key systems, NTRU is typically used in a hybrid mode for file encryption:</p>
+                    <ol>
+                        <li>Generate a random symmetric key (e.g., for AES)</li>
+                        <li>Encrypt the file with the symmetric key</li>
+                        <li>Encrypt the symmetric key with NTRU</li>
+                        <li>Send both the encrypted file and the encrypted symmetric key</li>
+                    </ol>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> NTRU is one of the most promising candidates for post-quantum cryptography. Its long history of cryptanalysis and efficient implementation make it a strong choice for applications that need to be secure against future quantum computer attacks.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKeys').addEventListener('click', async () => {
+        try {
+            const parameterSet = document.getElementById('parameterSet').value;
+            const response = await fetch('/asymmetric/ntru/generate-keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ parameter_set: parameterSet })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('privateKey').innerText = data.private_key;
+            document.getElementById('publicKey').innerText = data.public_key;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating keys: ' + error.message);
+        }
+    });
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('encryptFile').files[0];
+        const publicKey = document.getElementById('encryptKey').value;
+        const parameterSet = document.getElementById('encryptParameterSet').value;
+
+        if (!file || !publicKey) {
+            alert('Please select a file and enter the public key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('public_key', publicKey);
+        formData.append('parameter_set', parameterSet);
+
+        try {
+            const response = await fetch('/asymmetric/ntru/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ntru_encrypted_' + file.name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('decryptFile').files[0];
+        const privateKey = document.getElementById('decryptKey').value;
+        const parameterSet = document.getElementById('decryptParameterSet').value;
+
+        if (!file || !privateKey) {
+            alert('Please select a file and enter the private key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('private_key', privateKey);
+        formData.append('parameter_set', parameterSet);
+
+        try {
+            const response = await fetch('/asymmetric/ntru/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('ntru_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

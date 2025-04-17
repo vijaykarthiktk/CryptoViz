@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}BLAKE2 Hash Function{% endblock %}
+
+{% block additional_styles %}
+.hash-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.hash-result {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">BLAKE2 Hash Function</h1>
+                <p class="lead">BLAKE2 is a cryptographic hash function that is faster than MD5, SHA-1, SHA-2, and SHA-3, yet is at least as secure as the latest standard SHA-3.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="hash-container">
+                    <h4>Text Hashing</h4>
+                    <p class="text-muted">Generate a BLAKE2 hash from text input</p>
+                    <form id="textHashForm">
+                        <div class="mb-3">
+                            <label class="form-label">Text to Hash</label>
+                            <textarea class="form-control" id="textInput" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">BLAKE2 Variant</label>
+                            <select class="form-select" id="textHashVariant">
+                                <option value="blake2b" selected>BLAKE2b (optimized for 64-bit platforms)</option>
+                                <option value="blake2s">BLAKE2s (optimized for 8- to 32-bit platforms)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Digest Size (bytes)</label>
+                            <select class="form-select" id="textDigestSize">
+                                <option value="64" selected>64 (512 bits, BLAKE2b max)</option>
+                                <option value="48">48 (384 bits)</option>
+                                <option value="32">32 (256 bits, BLAKE2s max)</option>
+                                <option value="16">16 (128 bits)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Key (Optional, for MAC)</label>
+                            <input type="text" class="form-control" id="textKey" placeholder="Leave empty for unkeyed hash">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate Hash</button>
+                    </form>
+                    <div id="textHashResult" class="mt-3 d-none">
+                        <h5>BLAKE2 Hash:</h5>
+                        <div class="hash-result p-2 border rounded bg-light" id="textHashValue"></div>
+                        <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('textHashValue')">Copy Hash</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="hash-container">
+                    <h4>File Hashing</h4>
+                    <p class="text-muted">Generate a BLAKE2 hash from a file</p>
+                    <form id="fileHashForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Hash</label>
+                            <input type="file" class="form-control" id="fileInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">BLAKE2 Variant</label>
+                            <select class="form-select" id="fileHashVariant">
+                                <option value="blake2b" selected>BLAKE2b (optimized for 64-bit platforms)</option>
+                                <option value="blake2s">BLAKE2s (optimized for 8- to 32-bit platforms)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Digest Size (bytes)</label>
+                            <select class="form-select" id="fileDigestSize">
+                                <option value="64" selected>64 (512 bits, BLAKE2b max)</option>
+                                <option value="48">48 (384 bits)</option>
+                                <option value="32">32 (256 bits, BLAKE2s max)</option>
+                                <option value="16">16 (128 bits)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Key (Optional, for MAC)</label>
+                            <input type="text" class="form-control" id="fileKey" placeholder="Leave empty for unkeyed hash">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate Hash</button>
+                    </form>
+                    <div id="fileHashResult" class="mt-3 d-none">
+                        <h5>BLAKE2 Hash:</h5>
+                        <div class="hash-result p-2 border rounded bg-light" id="fileHashValue"></div>
+                        <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('fileHashValue')">Copy Hash</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About BLAKE2</h4>
+                    <p>BLAKE2 is a cryptographic hash function designed as a replacement for the widely used but aging MD5 and SHA-1 algorithms. It was designed by Jean-Philippe Aumasson, Samuel Neves, Zooko Wilcox-O'Hearn, and Christian Winnerlein.</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Speed:</strong> BLAKE2 is faster than MD5, SHA-1, SHA-2, and SHA-3 on modern CPUs</li>
+                        <li><strong>Security:</strong> Provides security at least as strong as SHA-3</li>
+                        <li><strong>Simplicity:</strong> Simple design makes it easier to implement correctly</li>
+                        <li><strong>Versatility:</strong> Can be used as a MAC, KDF, or random number generator</li>
+                        <li><strong>Parallelism:</strong> Efficiently parallelizable for even faster operation on multi-core systems</li>
+                    </ul>
+                    
+                    <h5>Variants:</h5>
+                    <ul>
+                        <li><strong>BLAKE2b:</strong> Optimized for 64-bit platforms, produces digests of up to 64 bytes (512 bits)</li>
+                        <li><strong>BLAKE2s:</strong> Optimized for 8- to 32-bit platforms, produces digests of up to 32 bytes (256 bits)</li>
+                        <li><strong>BLAKE2bp:</strong> A parallelized version of BLAKE2b</li>
+                        <li><strong>BLAKE2sp:</strong> A parallelized version of BLAKE2s</li>
+                    </ul>
+                    
+                    <h5>How it Works:</h5>
+                    <p>BLAKE2 is based on the ChaCha stream cipher and uses an internal state of 16 words. The compression function mixes the input message with the internal state through a series of addition, XOR, and rotation operations. The algorithm processes the input in blocks and updates the internal state for each block.</p>
+                    
+                    <p>The BLAKE2 algorithm can be used with an optional key, turning it into a MAC (Message Authentication Code). When used with a key, BLAKE2 provides both integrity and authenticity verification.</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> BLAKE2 is widely used in modern cryptographic applications and is considered one of the most secure and efficient hash functions available today. It's used in many security-critical applications, including password hashing, file integrity verification, and digital signatures.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('textHashForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const text = document.getElementById('textInput').value;
+        const variant = document.getElementById('textHashVariant').value;
+        const digestSize = document.getElementById('textDigestSize').value;
+        const key = document.getElementById('textKey').value;
+        
+        try {
+            const response = await fetch('/hash/blake2/text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    text: text,
+                    variant: variant,
+                    digest_size: digestSize,
+                    key: key || null
+                })
+            });
+            
+            const data = await response.json();
+            
+            document.getElementById('textHashValue').textContent = data.hash;
+            document.getElementById('textHashResult').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating hash: ' + error.message);
+        }
+    });
+
+    document.getElementById('fileHashForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const file = document.getElementById('fileInput').files[0];
+        const variant = document.getElementById('fileHashVariant').value;
+        const digestSize = document.getElementById('fileDigestSize').value;
+        const key = document.getElementById('fileKey').value;
+        
+        if (!file) {
+            alert('Please select a file');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('variant', variant);
+        formData.append('digest_size', digestSize);
+        if (key) {
+            formData.append('key', key);
+        }
+        
+        try {
+            const response = await fetch('/hash/blake2/file', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            document.getElementById('fileHashValue').textContent = data.hash;
+            document.getElementById('fileHashResult').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating hash: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

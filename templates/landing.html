@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}CryptoViz - Encryption & Decryption Tools{% endblock %}
+
+{% block additional_styles %}
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.content-wrapper {
+    flex: 1 0 auto;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 20px;
+    height: 100%;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+    color: white;
+    padding: 80px 0;
+    margin-bottom: 40px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4">CryptoViz</h1>
+        <p class="lead">Explore and visualize various encryption and decryption techniques</p>
+    </div>
+</div>
+
+<div class="content-wrapper">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2>Choose an Encryption Method</h2>
+                <p class="text-muted">Select from our wide range of cryptographic tools</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-center p-4">
+                    <div class="card-body">
+                        <div class="card-icon text-primary">
+                            <i class="bi bi-key-fill"></i>
+                        </div>
+                        <h3 class="card-title">Symmetric Encryption</h3>
+                        <p class="card-text">Encrypt and decrypt data using the same secret key.</p>
+                        <div class="mt-3">
+                            <a href="/symmetric/aes" class="btn btn-outline-primary me-1 mb-1">AES</a>
+                            <a href="/symmetric/des" class="btn btn-outline-primary me-1 mb-1">DES</a>
+                            <a href="/symmetric/3des" class="btn btn-outline-primary me-1 mb-1">3DES</a>
+                            <a href="/symmetric/blowfish" class="btn btn-outline-primary me-1 mb-1">Blowfish</a>
+                            <a href="/symmetric/twofish" class="btn btn-outline-primary me-1 mb-1">Twofish</a>
+                            <a href="/symmetric/rc4" class="btn btn-outline-primary me-1 mb-1">RC4</a>
+                            <a href="/symmetric/rc5" class="btn btn-outline-primary me-1 mb-1">RC5</a>
+                            <a href="/symmetric/rc6" class="btn btn-outline-primary me-1 mb-1">RC6</a>
+                            <a href="/symmetric/chacha20" class="btn btn-outline-primary me-1 mb-1">ChaCha20</a>
+                            <a href="/symmetric/salsa20" class="btn btn-outline-primary me-1 mb-1">Salsa20</a>
+                            <a href="/symmetric/camellia" class="btn btn-outline-primary me-1 mb-1">Camellia</a>
+                            <a href="/symmetric/serpent" class="btn btn-outline-primary me-1 mb-1">Serpent</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-center p-4">
+                    <div class="card-body">
+                        <div class="card-icon text-success">
+                            <i class="bi bi-lock-fill"></i>
+                        </div>
+                        <h3 class="card-title">Asymmetric Encryption</h3>
+                        <p class="card-text">Use public and private key pairs for secure communication.</p>
+                        <div class="mt-3">
+                            <a href="/asymmetric/rsa" class="btn btn-outline-success me-1 mb-1">RSA</a>
+                            <a href="/asymmetric/ecc" class="btn btn-outline-success me-1 mb-1">ECC</a>
+                            <a href="/asymmetric/dsa" class="btn btn-outline-success me-1 mb-1">DSA</a>
+                            <a href="/asymmetric/elgamal" class="btn btn-outline-success me-1 mb-1">ElGamal</a>
+                            <a href="/asymmetric/ntru" class="btn btn-outline-success me-1 mb-1">NTRU</a>
+                            <a href="/asymmetric/mceliece" class="btn btn-outline-success me-1 mb-1">McEliece</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-center p-4">
+                    <div class="card-body">
+                        <div class="card-icon text-danger">
+                            <i class="bi bi-hash"></i>
+                        </div>
+                        <h3 class="card-title">Hash Functions</h3>
+                        <p class="card-text">Generate fixed-size output from input data of any size.</p>
+                        <div class="mt-3">
+                            <a href="/hash/md5" class="btn btn-outline-danger me-1 mb-1">MD5</a>
+                            <a href="/hash/sha" class="btn btn-outline-danger me-1 mb-1">SHA-2</a>
+                            <a href="/hash/sha3" class="btn btn-outline-danger me-1 mb-1">SHA-3</a>
+                            <a href="/hash/bcrypt" class="btn btn-outline-danger me-1 mb-1">Bcrypt</a>
+                            <a href="/hash/argon2" class="btn btn-outline-danger me-1 mb-1">Argon2</a>
+                            <a href="/hash/blake2" class="btn btn-outline-danger me-1 mb-1">BLAKE2</a>
+                            <a href="/hash/poly1305" class="btn btn-outline-danger me-1 mb-1">Poly1305</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center p-4">
+                    <div class="card-body">
+                        <div class="card-icon text-warning">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <h3 class="card-title">Quantum-Safe Crypto</h3>
+                        <p class="card-text">Algorithms resistant to quantum computer attacks.</p>
+                        <div class="mt-3">
+                            <a href="/quantum/kyber" class="btn btn-outline-warning me-1 mb-1">Kyber</a>
+                            <a href="/quantum/dilithium" class="btn btn-outline-warning me-1 mb-1">Dilithium</a>
+                            <a href="/quantum/falcon" class="btn btn-outline-warning me-1 mb-1">Falcon</a>
+                            <a href="/quantum/sphincs" class="btn btn-outline-warning me-1 mb-1">SPHINCS+</a>
+                            <a href="/quantum/bike" class="btn btn-outline-warning me-1 mb-1">BIKE</a>
+                            <a href="/quantum/sike" class="btn btn-outline-warning me-1 mb-1">SIKE</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card p-4">
+                    <div class="card-body">
+                        <h3>What is Cryptography?</h3>
+                        <p>Cryptography is the practice and study of techniques for secure communication in the
+                            presence of third parties. It involves creating written or generated codes that allow
+                            information to be kept secret.</p>
+                        <p>Modern cryptography exists at the intersection of the disciplines of mathematics,
+                            computer science, electrical engineering, and communication science.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

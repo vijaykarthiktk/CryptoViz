@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}AES Encryption{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">AES Encryption</h1>
+                <p class="lead">Advanced Encryption Standard (AES) is a symmetric encryption algorithm widely used
+                    to secure sensitive data.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="key-container">
+
+                            <h4>Key Generation</h4>
+                            <p class="text-muted">Generate a secure key and initialization vector (IV) for AES
+                                encryption
+                            </p>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Key Size</label>
+                                    <select class="form-select" id="keySize">
+                                        <option value="128">128-bit</option>
+                                        <option value="192">192-bit</option>
+                                        <option value="256" selected>256-bit</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button id="generateKey" class="btn btn-primary mb-3">Generate Key & IV</button>
+                            <div id="keyOutput" class="d-none">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Secret Key (Keep this secure!)</label>
+                                            <div class="key-text border rounded p-2" id="secretKey"></div>
+                                            <button class="btn btn-sm btn-secondary mt-2"
+                                                onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Initialization Vector (IV)</label>
+                                            <div class="key-text border rounded p-2" id="iv"></div>
+                                            <button class="btn btn-sm btn-secondary mt-2"
+                                                onclick="copyToClipboard('iv')">Copy IV</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="file-container">
+                            <h4>Encrypt File</h4>
+                            <p class="text-muted">Upload a file and encrypt it with AES</p>
+                            <form id="encryptForm">
+                                <div class="mb-3">
+                                    <label class="form-label">File to Encrypt</label>
+                                    <input type="file" class="form-control" id="encryptFile" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key</label>
+                                    <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Initialization Vector (IV)</label>
+                                    <textarea class="form-control" id="encryptIV" rows="2" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="file-container">
+                            <h4>Decrypt File</h4>
+                            <p class="text-muted">Upload an encrypted file and decrypt it with AES</p>
+                            <form id="decryptForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Encrypted File</label>
+                                    <input type="file" class="form-control" id="decryptFile" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key</label>
+                                    <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Initialization Vector (IV)</label>
+                                    <textarea class="form-control" id="decryptIV" rows="2" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h4>About AES Encryption</h4>
+                        <p>The Advanced Encryption Standard (AES) is a symmetric block cipher chosen by the U.S.
+                            government to protect classified information. It is implemented in software and hardware
+                            throughout the world to encrypt sensitive data.</p>
+                        <ul>
+                            <li>AES is a symmetric key algorithm, meaning the same key is used for both encryption
+                                and
+                                decryption.</li>
+                            <li>It operates on fixed-size blocks of data (128 bits) using cryptographic keys of 128,
+                                192, or 256 bits.</li>
+                            <li>AES is considered secure against all known practical attacks.</li>
+                        </ul>
+                        <h5>How AES Works:</h5>
+                        <ol>
+                            <li>Key Expansion: The AES key is expanded into a key schedule.</li>
+                            <li>Initial Round: AddRoundKey - each byte of the state is combined with a block of the
+                                round key using bitwise XOR.</li>
+                            <li>Rounds (9, 11, or 13 rounds depending on key size):
+                                <ul>
+                                    <li>SubBytes - a non-linear substitution step where each byte is replaced with
+                                        another according to a lookup table.</li>
+                                    <li>ShiftRows - a transposition step where the last three rows of the state are
+                                        shifted cyclically.</li>
+                                    <li>MixColumns - a mixing operation which operates on the columns of the state,
+                                        combining the four bytes in each column.</li>
+                                    <li>AddRoundKey</li>
+                                </ul>
+                            </li>
+                            <li>Final Round (without MixColumns):
+                                <ul>
+                                    <li>SubBytes</li>
+                                    <li>ShiftRows</li>
+                                    <li>AddRoundKey</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='aes.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,484 @@
+{% extends 'base.html' %}
+
+{% block title %}Picnic - Quantum-Safe Digital Signatures{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Picnic - Quantum-Safe Digital Signatures</h1>
+                <p class="lead">Picnic is a post-quantum digital signature algorithm based on zero-knowledge proofs and symmetric-key primitives.</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a Picnic key pair for signing and verification</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Parameter Set</label>
+                            <select class="form-select" id="parameterSet">
+                                <option value="picnic-l1-fs">Picnic-L1-FS (NIST Level 1)</option>
+                                <option value="picnic-l1-ur">Picnic-L1-UR (NIST Level 1, smaller)</option>
+                                <option value="picnic-l1-full">Picnic-L1-full (NIST Level 1, faster)</option>
+                                <option value="picnic-l3-fs" selected>Picnic-L3-FS (NIST Level 3)</option>
+                                <option value="picnic-l3-ur">Picnic-L3-UR (NIST Level 3, smaller)</option>
+                                <option value="picnic-l3-full">Picnic-L3-full (NIST Level 3, faster)</option>
+                                <option value="picnic-l5-fs">Picnic-L5-FS (NIST Level 5)</option>
+                                <option value="picnic-l5-ur">Picnic-L5-UR (NIST Level 5, smaller)</option>
+                                <option value="picnic-l5-full">Picnic-L5-full (NIST Level 5, faster)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKeys" class="btn btn-primary mb-3">Generate Key Pair</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Private Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="privateKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Public Key (Share this with others)</label>
+                                    <div class="key-text border rounded p-2" id="publicKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Sign File</h4>
+                    <p class="text-muted">Upload a file and sign it with your private key</p>
+                    <form id="signForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Sign</label>
+                            <input type="file" class="form-control" id="signFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Private Key</label>
+                            <textarea class="form-control" id="signKey" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Parameter Set</label>
+                            <select class="form-select" id="signParameterSet">
+                                <option value="picnic-l1-fs">Picnic-L1-FS (NIST Level 1)</option>
+                                <option value="picnic-l1-ur">Picnic-L1-UR (NIST Level 1, smaller)</option>
+                                <option value="picnic-l1-full">Picnic-L1-full (NIST Level 1, faster)</option>
+                                <option value="picnic-l3-fs" selected>Picnic-L3-FS (NIST Level 3)</option>
+                                <option value="picnic-l3-ur">Picnic-L3-UR (NIST Level 3, smaller)</option>
+                                <option value="picnic-l3-full">Picnic-L3-full (NIST Level 3, faster)</option>
+                                <option value="picnic-l5-fs">Picnic-L5-FS (NIST Level 5)</option>
+                                <option value="picnic-l5-ur">Picnic-L5-UR (NIST Level 5, smaller)</option>
+                                <option value="picnic-l5-full">Picnic-L5-full (NIST Level 5, faster)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign File</button>
+                    </form>
+                    <div id="signatureOutput" class="mt-3 d-none">
+                        <div class="mb-3">
+                            <label class="form-label">Signature</label>
+                            <div class="key-text border rounded p-2" id="signature"></div>
+                            <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('signature')">Copy Signature</button>
+                            <button class="btn btn-sm btn-primary mt-2" id="downloadSignature">Download Signature</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Verify Signature</h4>
+                    <p class="text-muted">Verify a file's signature using the signer's public key</p>
+                    <form id="verifyForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Verify</label>
+                            <input type="file" class="form-control" id="verifyFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Signature</label>
+                            <textarea class="form-control" id="verifySignature" rows="3" required></textarea>
+                            <div class="form-text">Paste the signature or upload a signature file</div>
+                            <input type="file" class="form-control mt-2" id="signatureFile">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Signer's Public Key</label>
+                            <textarea class="form-control" id="verifyKey" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Parameter Set</label>
+                            <select class="form-select" id="verifyParameterSet">
+                                <option value="picnic-l1-fs">Picnic-L1-FS (NIST Level 1)</option>
+                                <option value="picnic-l1-ur">Picnic-L1-UR (NIST Level 1, smaller)</option>
+                                <option value="picnic-l1-full">Picnic-L1-full (NIST Level 1, faster)</option>
+                                <option value="picnic-l3-fs" selected>Picnic-L3-FS (NIST Level 3)</option>
+                                <option value="picnic-l3-ur">Picnic-L3-UR (NIST Level 3, smaller)</option>
+                                <option value="picnic-l3-full">Picnic-L3-full (NIST Level 3, faster)</option>
+                                <option value="picnic-l5-fs">Picnic-L5-FS (NIST Level 5)</option>
+                                <option value="picnic-l5-ur">Picnic-L5-UR (NIST Level 5, smaller)</option>
+                                <option value="picnic-l5-full">Picnic-L5-full (NIST Level 5, faster)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verify Signature</button>
+                    </form>
+                    <div id="verifyOutput" class="mt-3 d-none">
+                        <div id="verifyResult" class="alert">
+                            <!-- Result will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About Picnic</h4>
+                    <p>Picnic is a post-quantum digital signature algorithm that uses a novel approach based on zero-knowledge proofs and symmetric-key primitives. It was an alternate candidate in the third round of the NIST Post-Quantum Cryptography standardization process.</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Type:</strong> Zero-knowledge proof-based digital signature algorithm</li>
+                        <li><strong>Security Basis:</strong> Relies only on the security of symmetric-key primitives (block ciphers and hash functions)</li>
+                        <li><strong>Quantum Resistance:</strong> Designed to be secure against attacks from quantum computers</li>
+                        <li><strong>Key Sizes:</strong> Very small public and private keys</li>
+                        <li><strong>Signature Size:</strong> Moderate to large signatures (depending on the parameter set)</li>
+                        <li><strong>Variants:</strong> Multiple parameter sets with different security levels and performance characteristics</li>
+                    </ul>
+                    
+                    <h5>How Picnic Works:</h5>
+                    <p>Picnic uses a "MPC-in-the-head" approach to create zero-knowledge proofs:</p>
+                    <ol>
+                        <li><strong>Key Generation:</strong>
+                            <ul>
+                                <li>Generate a random private key (a symmetric key)</li>
+                                <li>Encrypt a fixed plaintext with this key using a block cipher</li>
+                                <li>The public key consists of the plaintext and ciphertext pair</li>
+                            </ul>
+                        </li>
+                        <li><strong>Signing:</strong>
+                            <ul>
+                                <li>Create a zero-knowledge proof that demonstrates knowledge of the private key</li>
+                                <li>This proof shows that the signer knows a key that transforms the plaintext to the ciphertext</li>
+                                <li>The proof is created using a "multi-party computation in the head" technique</li>
+                                <li>The signature consists of this zero-knowledge proof</li>
+                            </ul>
+                        </li>
+                        <li><strong>Verification:</strong>
+                            <ul>
+                                <li>Verify the zero-knowledge proof using the public key</li>
+                                <li>If the proof is valid, the signature is authentic</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <h5>Parameter Sets:</h5>
+                    <p>Picnic offers several parameter sets with different security levels and performance characteristics:</p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Parameter Set</th>
+                                <th>Security Level</th>
+                                <th>Signature Size</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Picnic-L1-FS</td>
+                                <td>NIST Level 1 (128-bit classical)</td>
+                                <td>Medium</td>
+                                <td>Balanced</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L1-UR</td>
+                                <td>NIST Level 1 (128-bit classical)</td>
+                                <td>Smaller</td>
+                                <td>Slower</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L1-full</td>
+                                <td>NIST Level 1 (128-bit classical)</td>
+                                <td>Larger</td>
+                                <td>Faster</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L3-FS</td>
+                                <td>NIST Level 3 (192-bit classical)</td>
+                                <td>Medium</td>
+                                <td>Balanced</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L3-UR</td>
+                                <td>NIST Level 3 (192-bit classical)</td>
+                                <td>Smaller</td>
+                                <td>Slower</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L3-full</td>
+                                <td>NIST Level 3 (192-bit classical)</td>
+                                <td>Larger</td>
+                                <td>Faster</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L5-FS</td>
+                                <td>NIST Level 5 (256-bit classical)</td>
+                                <td>Medium</td>
+                                <td>Balanced</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L5-UR</td>
+                                <td>NIST Level 5 (256-bit classical)</td>
+                                <td>Smaller</td>
+                                <td>Slower</td>
+                            </tr>
+                            <tr>
+                                <td>Picnic-L5-full</td>
+                                <td>NIST Level 5 (256-bit classical)</td>
+                                <td>Larger</td>
+                                <td>Faster</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h5>Advantages of Picnic:</h5>
+                    <ul>
+                        <li><strong>Minimal Assumptions:</strong> Security relies only on well-studied symmetric-key primitives</li>
+                        <li><strong>Small Keys:</strong> Very compact public and private keys</li>
+                        <li><strong>Flexibility:</strong> Multiple parameter sets offering different tradeoffs</li>
+                        <li><strong>Diversity:</strong> Provides a different approach compared to other post-quantum signature schemes</li>
+                    </ul>
+                    
+                    <h5>Limitations:</h5>
+                    <ul>
+                        <li><strong>Signature Size:</strong> Larger signatures compared to classical algorithms and some other post-quantum alternatives</li>
+                        <li><strong>Performance:</strong> Signing and verification are computationally intensive</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> While Picnic was not selected as a primary standard by NIST, it represents an interesting alternative approach to post-quantum signatures. Its security relies on different assumptions than the selected algorithms (Dilithium, Falcon, and SPHINCS+), which provides valuable diversity in the post-quantum cryptography ecosystem.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.innerText || element.value;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+// Read signature file when selected
+document.getElementById('signatureFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('verifySignature').value = e.target.result;
+    };
+    reader.readAsText(file);
+});
+
+// Sync parameter set selections
+document.getElementById('parameterSet').addEventListener('change', function() {
+    document.getElementById('signParameterSet').value = this.value;
+    document.getElementById('verifyParameterSet').value = this.value;
+});
+
+document.getElementById('generateKeys').addEventListener('click', async () => {
+    try {
+        const parameterSet = document.getElementById('parameterSet').value;
+        
+        // Show loading indicator
+        document.getElementById('generateKeys').disabled = true;
+        document.getElementById('generateKeys').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+        
+        const response = await fetch('/quantum/picnic/generate-keys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ parameter_set: parameterSet })
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('privateKey').innerText = data.private_key;
+        document.getElementById('publicKey').innerText = data.public_key;
+        document.getElementById('keyOutput').classList.remove('d-none');
+        
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    } catch (error) {
+        alert('Error generating keys: ' + error.message);
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    }
+});
+
+document.getElementById('signForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('signFile').files[0];
+    const privateKey = document.getElementById('signKey').value;
+    const parameterSet = document.getElementById('signParameterSet').value;
+    
+    if (!file || !privateKey) {
+        alert('Please select a file and enter your private key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('private_key', privateKey);
+    formData.append('parameter_set', parameterSet);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#signForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing...';
+        
+        const response = await fetch('/quantum/picnic/sign', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('signature').innerText = data.signature;
+        document.getElementById('signatureOutput').classList.remove('d-none');
+        
+        // Set up download button
+        document.getElementById('downloadSignature').onclick = function() {
+            const blob = new Blob([data.signature], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name + '.picnic.sig';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        };
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Sign File';
+    } catch (error) {
+        alert('Error signing file: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#signForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Sign File';
+    }
+});
+
+document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('verifyFile').files[0];
+    const signature = document.getElementById('verifySignature').value;
+    const publicKey = document.getElementById('verifyKey').value;
+    const parameterSet = document.getElementById('verifyParameterSet').value;
+    
+    if (!file || !signature || !publicKey) {
+        alert('Please select a file, enter the signature, and enter the public key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('signature', signature);
+    formData.append('public_key', publicKey);
+    formData.append('parameter_set', parameterSet);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#verifyForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
+        
+        const response = await fetch('/quantum/picnic/verify', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        const verifyResult = document.getElementById('verifyResult');
+        
+        if (data.valid) {
+            verifyResult.className = 'alert alert-success';
+            verifyResult.innerHTML = '<strong>Valid Signature!</strong> The signature is authentic and the file has not been modified since it was signed.';
+        } else {
+            verifyResult.className = 'alert alert-danger';
+            verifyResult.innerHTML = '<strong>Invalid Signature!</strong> The signature could not be verified. Either the file has been modified, the signature is incorrect, or the wrong public key was used.';
+        }
+        
+        document.getElementById('verifyOutput').classList.remove('d-none');
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Verify Signature';
+    } catch (error) {
+        alert('Error verifying signature: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#verifyForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Verify Signature';
+    }
+});
+</script>
+{% endblock %}

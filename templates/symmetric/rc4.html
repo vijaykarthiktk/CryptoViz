@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}RC4 Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.file-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">RC4 Encryption</h1>
+                <p class="lead">RC4 (Rivest Cipher 4) is a stream cipher that was once widely used in popular protocols
+                    such as SSL/TLS and WEP.</p>
+                <div class="alert alert-warning">
+                    <strong>Security Warning:</strong> RC4 is now considered cryptographically broken and should not be
+                    used in new systems. It is included here for educational purposes only.
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a secure key for RC4 encryption</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Key Length</label>
+                            <select class="form-select" id="keyLength">
+                                <option value="40">40-bit (Very weak)</option>
+                                <option value="56">56-bit (Weak)</option>
+                                <option value="128" selected>128-bit (Standard)</option>
+                                <option value="256">256-bit (Stronger)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKey" class="btn btn-primary mb-3">Generate Key</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="secretKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with RC4</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with RC4</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About RC4 Encryption</h4>
+                    <p>RC4 (Rivest Cipher 4) is a stream cipher designed by Ron Rivest in 1987 for RSA Security. It was
+                        initially a trade secret, but was leaked in 1994 and has been widely analyzed since then.</p>
+                    <ul>
+                        <li>RC4 is a stream cipher, which means it encrypts individual bytes of data one at a time.</li>
+                        <li>It uses a variable key length, typically between 40 and 2048 bits.</li>
+                        <li>RC4 is notable for its simplicity and speed in software implementations.</li>
+                        <li>It was once widely used in protocols like WEP (Wireless Equivalent Privacy), SSL/TLS, and
+                            various commercial products.</li>
+                    </ul>
+                    <h5>How RC4 Works:</h5>
+                    <ol>
+                        <li>The algorithm uses a key to initialize a 256-byte state array.</li>
+                        <li>The state array is then used to generate a pseudo-random keystream.</li>
+                        <li>The keystream is XORed with the plaintext to produce the ciphertext.</li>
+                        <li>Decryption is performed by XORing the same keystream with the ciphertext.</li>
+                    </ol>
+                    <div class="alert alert-danger">
+                        <h5>Security Vulnerabilities:</h5>
+                        <p>RC4 is now considered cryptographically broken and should not be used in new systems for the
+                            following reasons:</p>
+                        <ul>
+                            <li>Statistical biases in the keystream can lead to plaintext recovery in certain scenarios.
+                            </li>
+                            <li>The WEP protocol, which used RC4, was completely broken due to weaknesses in RC4 and its
+                                implementation.</li>
+                            <li>In 2013, researchers demonstrated practical attacks against RC4 in TLS that could
+                                recover user passwords and other sensitive information.</li>
+                            <li>In 2015, the "FREAK" attack exploited RC4 weaknesses in SSL/TLS implementations.</li>
+                            <li>Modern browsers and servers have disabled RC4 support due to these security concerns.
+                            </li>
+                        </ul>
+                        <p>For secure communications, modern algorithms like AES, ChaCha20, or Twofish are strongly
+                            recommended instead of RC4.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKey').addEventListener('click', async () => {
+        try {
+            const keyLength = document.getElementById('keyLength').value;
+            const response = await fetch('/generate-rc4-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key_length: keyLength })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('secretKey').innerText = data.key;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating key: ' + error.message);
+        }
+    });
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('encryptFile').files[0];
+        const key = document.getElementById('encryptKey').value;
+
+        if (!file || !key) {
+            alert('Please select a file and enter the key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+
+        try {
+            const response = await fetch('/symmetric/rc4/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'rc4_encrypted_' + file.name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('decryptFile').files[0];
+        const key = document.getElementById('decryptKey').value;
+
+        if (!file || !key) {
+            alert('Please select a file and enter the key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+
+        try {
+            const response = await fetch('/symmetric/rc4/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('rc4_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

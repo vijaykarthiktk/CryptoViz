@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Kyber - Quantum-Safe Key Exchange{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Kyber - Quantum-Safe Key Exchange</h1>
+                <p class="lead">Kyber is a lattice-based key encapsulation mechanism (KEM) that is secure against attacks by quantum computers.</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Generate Kyber Keys</h2>
+                        <div class="mb-3">
+                            <label for="securityLevel" class="form-label">Security Level:</label>
+                            <select class="form-select" id="securityLevel">
+                                <option value="512">Kyber-512 (NIST Level 1)</option>
+                                <option value="768" selected>Kyber-768 (NIST Level 3)</option>
+                                <option value="1024">Kyber-1024 (NIST Level 5)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <button id="generateKeys" class="btn btn-primary">Generate Keys</button>
+                        </div>
+                        <div id="keyOutput" class="d-none">
+                            <div class="mb-3">
+                                <label class="form-label">Private Key (Keep this secure!)</label>
+                                <div class="key-text border rounded p-2" id="privateKey"></div>
+                                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Public Key (Share this)</label>
+                                <div class="key-text border rounded p-2" id="publicKey"></div>
+                                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">About Kyber Security Levels</h2>
+                        <p>Kyber offers different security levels to balance security and performance:</p>
+                        <ul>
+                            <li><strong>Kyber-512:</strong> NIST Level 1 security (equivalent to AES-128)</li>
+                            <li><strong>Kyber-768:</strong> NIST Level 3 security (equivalent to AES-192)</li>
+                            <li><strong>Kyber-1024:</strong> NIST Level 5 security (equivalent to AES-256)</li>
+                        </ul>
+                        <p>Higher security levels provide stronger protection but require more computational resources and bandwidth.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Encapsulate Key with Kyber</h2>
+                        <p class="text-muted">Generate a shared secret using recipient's public key</p>
+                        <form id="encapsulateForm">
+                            <div class="mb-3">
+                                <label for="recipientPublicKey" class="form-label">Recipient's Public Key:</label>
+                                <textarea class="form-control" id="recipientPublicKey" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="encapSecurityLevel" class="form-label">Security Level:</label>
+                                <select class="form-select" id="encapSecurityLevel">
+                                    <option value="512">Kyber-512 (NIST Level 1)</option>
+                                    <option value="768" selected>Kyber-768 (NIST Level 3)</option>
+                                    <option value="1024">Kyber-1024 (NIST Level 5)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Generate Shared Secret</button>
+                        </form>
+                        <div id="encapsulateResult" class="mt-3 d-none">
+                            <div class="mb-3">
+                                <label class="form-label">Ciphertext (Send to recipient):</label>
+                                <div class="key-text border rounded p-2" id="ciphertext"></div>
+                                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('ciphertext')">Copy Ciphertext</button>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Shared Secret (Keep this secure!):</label>
+                                <div class="key-text border rounded p-2" id="sharedSecret"></div>
+                                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('sharedSecret')">Copy Shared Secret</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Decapsulate Key with Kyber</h2>
+                        <p class="text-muted">Recover the shared secret using your private key</p>
+                        <form id="decapsulateForm">
+                            <div class="mb-3">
+                                <label for="receivedCiphertext" class="form-label">Received Ciphertext:</label>
+                                <textarea class="form-control" id="receivedCiphertext" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="yourPrivateKey" class="form-label">Your Private Key:</label>
+                                <textarea class="form-control" id="yourPrivateKey" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="decapSecurityLevel" class="form-label">Security Level:</label>
+                                <select class="form-select" id="decapSecurityLevel">
+                                    <option value="512">Kyber-512 (NIST Level 1)</option>
+                                    <option value="768" selected>Kyber-768 (NIST Level 3)</option>
+                                    <option value="1024">Kyber-1024 (NIST Level 5)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Recover Shared Secret</button>
+                        </form>
+                        <div id="decapsulateResult" class="mt-3 d-none">
+                            <div class="mb-3">
+                                <label class="form-label">Recovered Shared Secret:</label>
+                                <div class="key-text border rounded p-2" id="recoveredSecret"></div>
+                                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('recoveredSecret')">Copy Shared Secret</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About Kyber</h4>
+                    <p>Kyber is a lattice-based key encapsulation mechanism (KEM) that was selected by NIST as the first standardized post-quantum key establishment algorithm. It was designed to be secure against attacks by both classical and quantum computers.</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Post-Quantum Security:</strong> Resistant to attacks by quantum computers, unlike traditional algorithms like RSA and ECC</li>
+                        <li><strong>Efficiency:</strong> Offers good performance in terms of key size, computation time, and bandwidth requirements</li>
+                        <li><strong>Standardization:</strong> Selected by NIST as the first post-quantum key establishment algorithm for standardization</li>
+                        <li><strong>Flexibility:</strong> Provides multiple parameter sets for different security levels</li>
+                    </ul>
+                    
+                    <h5>How it Works:</h5>
+                    <p>Kyber is based on the hardness of the Module Learning With Errors (MLWE) problem, which is believed to be resistant to quantum attacks. The algorithm consists of three main operations:</p>
+                    
+                    <ol>
+                        <li><strong>Key Generation:</strong> Creates a public key and private key pair</li>
+                        <li><strong>Encapsulation:</strong> Uses the recipient's public key to generate a shared secret and an encapsulation (ciphertext)</li>
+                        <li><strong>Decapsulation:</strong> Uses the recipient's private key and the encapsulation to recover the shared secret</li>
+                    </ol>
+                    
+                    <h5>Applications:</h5>
+                    <p>Kyber can be used in various cryptographic protocols that require key exchange or key establishment, such as:</p>
+                    <ul>
+                        <li>TLS (Transport Layer Security) for secure web browsing</li>
+                        <li>SSH (Secure Shell) for secure remote access</li>
+                        <li>VPNs (Virtual Private Networks) for secure communication</li>
+                        <li>Secure messaging applications</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Kyber is designed specifically for key exchange and cannot be used directly for encryption or digital signatures. For those purposes, other post-quantum algorithms like NTRU (encryption) or Dilithium (signatures) should be used.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKeys').addEventListener('click', async () => {
+        try {
+            const securityLevel = document.getElementById('securityLevel').value;
+            const response = await fetch('/quantum/kyber/generate-keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ security_level: securityLevel })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('privateKey').innerText = data.private_key;
+            document.getElementById('publicKey').innerText = data.public_key;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating keys: ' + error.message);
+        }
+    });
+
+    document.getElementById('encapsulateForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const publicKey = document.getElementById('recipientPublicKey').value;
+        const securityLevel = document.getElementById('encapSecurityLevel').value;
+
+        if (!publicKey) {
+            alert('Please enter the recipient\'s public key');
+            return;
+        }
+
+        try {
+            const response = await fetch('/quantum/kyber/encapsulate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    public_key: publicKey,
+                    security_level: securityLevel
+                })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('ciphertext').innerText = data.ciphertext;
+            document.getElementById('sharedSecret').innerText = data.shared_secret;
+            document.getElementById('encapsulateResult').classList.remove('d-none');
+        } catch (error) {
+            alert('Error encapsulating key: ' + error.message);
+        }
+    });
+
+    document.getElementById('decapsulateForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const ciphertext = document.getElementById('receivedCiphertext').value;
+        const privateKey = document.getElementById('yourPrivateKey').value;
+        const securityLevel = document.getElementById('decapSecurityLevel').value;
+
+        if (!ciphertext || !privateKey) {
+            alert('Please enter both the ciphertext and your private key');
+            return;
+        }
+
+        try {
+            const response = await fetch('/quantum/kyber/decapsulate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ciphertext: ciphertext,
+                    private_key: privateKey,
+                    security_level: securityLevel
+                })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('recoveredSecret').innerText = data.shared_secret;
+            document.getElementById('decapsulateResult').classList.remove('d-none');
+        } catch (error) {
+            alert('Error decapsulating key: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

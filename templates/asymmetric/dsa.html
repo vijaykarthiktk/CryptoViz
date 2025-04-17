@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block title %}DSA Digital Signatures{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.file-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Digital Signature Algorithm (DSA)</h1>
+                <p class="lead">DSA is a Federal Information Processing Standard for digital signatures, based on the
+                    mathematical concept of modular exponentiation and the discrete logarithm problem.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a new DSA key pair for digital signatures</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Key Size</label>
+                            <select class="form-select" id="keySize">
+                                <option value="1024">1024-bit (Not recommended)</option>
+                                <option value="2048" selected>2048-bit (Standard)</option>
+                                <option value="3072">3072-bit (Stronger)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKeys" class="btn btn-primary mb-3">Generate Key Pair</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Private Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="privateKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Public Key (Share this with others)</label>
+                                    <div class="key-text border rounded p-2" id="publicKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Sign File</h4>
+                    <p class="text-muted">Upload a file and sign it with your private key</p>
+                    <form id="signForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Sign</label>
+                            <input type="file" class="form-control" id="signFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Private Key</label>
+                            <textarea class="form-control" id="signKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Verify Signature</h4>
+                    <p class="text-muted">Verify a file's signature using the signer's public key</p>
+                    <form id="verifyForm">
+                        <div class="mb-3">
+                            <label class="form-label">Original File</label>
+                            <input type="file" class="form-control" id="verifyFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Signature File</label>
+                            <input type="file" class="form-control" id="signatureFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Signer's Public Key</label>
+                            <textarea class="form-control" id="verifyKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verify Signature</button>
+                    </form>
+                    <div id="verifyResult" class="mt-3 d-none">
+                        <div class="alert" id="verifyAlert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About Digital Signature Algorithm (DSA)</h4>
+                    <p>The Digital Signature Algorithm (DSA) is a Federal Information Processing Standard (FIPS 186) for
+                        digital signatures. It was proposed by the National Institute of Standards and Technology (NIST)
+                        in 1991 and became a standard in 1994.</p>
+                    <ul>
+                        <li>DSA is specifically designed for digital signatures, not for encryption.</li>
+                        <li>It is based on the mathematical concepts of modular exponentiation and the discrete
+                            logarithm problem.</li>
+                        <li>DSA generates signatures that are relatively small compared to some other signature
+                            algorithms.</li>
+                        <li>The algorithm uses a pair of keys: a private key for signing and a public key for
+                            verification.</li>
+                    </ul>
+                    <h5>How DSA Works:</h5>
+                    <ol>
+                        <li><strong>Key Generation:</strong> The algorithm generates a private key and a corresponding
+                            public key.</li>
+                        <li><strong>Signing:</strong> The private key is used to create a digital signature for a
+                            specific message or file.</li>
+                        <li><strong>Verification:</strong> Anyone with the public key can verify that the signature was
+                            created by the owner of the corresponding private key.</li>
+                    </ol>
+                    <h5>Security Considerations:</h5>
+                    <ul>
+                        <li>The security of DSA relies on the difficulty of solving the discrete logarithm problem.</li>
+                        <li>Key sizes of at least 2048 bits are recommended for adequate security in modern
+                            applications.</li>
+                        <li>DSA requires a good source of randomness for key generation and signing operations.</li>
+                        <li>If the same random value is used for multiple signatures, the private key can be
+                            compromised.</li>
+                    </ul>
+                    <h5>Comparison with Other Signature Algorithms:</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Advantages</th>
+                                <th>Disadvantages</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>DSA</td>
+                                <td>
+                                    <ul>
+                                        <li>Smaller signatures than RSA</li>
+                                        <li>Faster signature generation than RSA</li>
+                                        <li>Standardized and widely implemented</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li>Slower verification than RSA</li>
+                                        <li>Requires good randomness for security</li>
+                                        <li>Limited to signature operations only</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>RSA</td>
+                                <td>
+                                    <ul>
+                                        <li>Can be used for both encryption and signatures</li>
+                                        <li>Faster verification than DSA</li>
+                                        <li>Simpler to implement</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li>Larger signatures than DSA</li>
+                                        <li>Slower signature generation</li>
+                                        <li>Requires larger key sizes for equivalent security</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ECDSA</td>
+                                <td>
+                                    <ul>
+                                        <li>Much smaller keys than DSA for equivalent security</li>
+                                        <li>Faster operations on constrained devices</li>
+                                        <li>Smaller signatures than DSA</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li>More complex to implement correctly</li>
+                                        <li>Requires good randomness for security</li>
+                                        <li>Patent concerns with some curves (though less so now)</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKeys').addEventListener('click', async () => {
+        try {
+            // Show loading indicator
+            document.getElementById('generateKeys').disabled = true;
+            document.getElementById('generateKeys').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+
+            const keySize = document.getElementById('keySize').value;
+            const response = await fetch('/asymmetric/dsa/generate-keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key_size: keySize })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('privateKey').innerText = data.private_key;
+            document.getElementById('publicKey').innerText = data.public_key;
+            document.getElementById('keyOutput').classList.remove('d-none');
+
+            // Reset button
+            document.getElementById('generateKeys').disabled = false;
+            document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+        } catch (error) {
+            alert('Error generating keys: ' + error.message);
+            // Reset button
+            document.getElementById('generateKeys').disabled = false;
+            document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+        }
+    });
+
+    document.getElementById('signForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('signFile').files[0];
+        const privateKey = document.getElementById('signKey').value;
+
+        if (!file || !privateKey) {
+            alert('Please select a file and enter your private key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('private_key', privateKey);
+
+        try {
+            const response = await fetch('/asymmetric/dsa/sign', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name + '.sig';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to sign file');
+            }
+        } catch (error) {
+            alert('Error signing file: ' + error.message);
+        }
+    });
+
+    document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('verifyFile').files[0];
+        const signatureFile = document.getElementById('signatureFile').files[0];
+        const publicKey = document.getElementById('verifyKey').value;
+
+        if (!file || !signatureFile || !publicKey) {
+            alert('Please select both files and enter the signer\'s public key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('signature_file', signatureFile);
+        formData.append('public_key', publicKey);
+
+        try {
+            const response = await fetch('/asymmetric/dsa/verify', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const verifyResult = document.getElementById('verifyResult');
+            const verifyAlert = document.getElementById('verifyAlert');
+
+            verifyResult.classList.remove('d-none');
+
+            if (result.valid) {
+                verifyAlert.className = 'alert alert-success';
+                verifyAlert.innerHTML = '<strong>Success!</strong> The signature is valid. This file was signed by the owner of the provided public key.';
+            } else {
+                verifyAlert.className = 'alert alert-danger';
+                verifyAlert.innerHTML = '<strong>Invalid!</strong> The signature verification failed. Either the file was modified, or it was not signed by the owner of the provided public key.';
+            }
+        } catch (error) {
+            alert('Error verifying signature: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Salsa20 Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Salsa20 Encryption</h1>
+                <p class="lead">Salsa20 is a stream cipher designed by Daniel J. Bernstein, offering high performance and security.</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a secure key and nonce for Salsa20 encryption</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Key Size</label>
+                            <select class="form-select" id="keySize">
+                                <option value="128">128-bit</option>
+                                <option value="256" selected>256-bit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKey" class="btn btn-primary mb-3">Generate Key & Nonce</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="secretKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Nonce</label>
+                                    <div class="key-text border rounded p-2" id="nonce"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('nonce')">Copy Nonce</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with Salsa20</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nonce</label>
+                            <textarea class="form-control" id="encryptNonce" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with Salsa20</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nonce</label>
+                            <textarea class="form-control" id="decryptNonce" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About Salsa20 Encryption</h4>
+                    <p>Salsa20 is a stream cipher designed by Daniel J. Bernstein in 2005. It is part of the eSTREAM portfolio of recommended stream ciphers and has been widely adopted for its security and performance characteristics.</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Stream Cipher:</strong> Salsa20 generates a keystream that is XORed with the plaintext to produce ciphertext.</li>
+                        <li><strong>Key Sizes:</strong> Supports 128-bit and 256-bit keys.</li>
+                        <li><strong>Nonce:</strong> Uses an 8-byte (64-bit) nonce, allowing up to 2^64 different keystreams from a single key.</li>
+                        <li><strong>Performance:</strong> Designed for high speed in software implementations, particularly on modern processors.</li>
+                        <li><strong>Security:</strong> No practical cryptanalytic attacks have been found against the full 20-round version.</li>
+                        <li><strong>Variants:</strong> Includes Salsa20/8 and Salsa20/12 with fewer rounds for higher performance, and XSalsa20 with an extended 192-bit nonce.</li>
+                    </ul>
+                    
+                    <h5>How Salsa20 Works:</h5>
+                    <ol>
+                        <li>Salsa20 uses a simple core function that transforms a 64-byte block using a series of addition, XOR, and rotation operations.</li>
+                        <li>The core function is applied to a block containing the key, nonce, and a counter.</li>
+                        <li>The result is XORed with the plaintext to produce ciphertext (or with ciphertext to produce plaintext).</li>
+                        <li>The counter is incremented for each block, ensuring that each block uses a different keystream.</li>
+                    </ol>
+                    
+                    <h5>Advantages of Salsa20:</h5>
+                    <ul>
+                        <li><strong>Speed:</strong> Very fast in software, especially on modern processors.</li>
+                        <li><strong>Simplicity:</strong> Clean design with no complex S-boxes or lookup tables.</li>
+                        <li><strong>Resistance to Side-Channel Attacks:</strong> Constant-time implementation is straightforward.</li>
+                        <li><strong>No Patent Restrictions:</strong> Free to use in any application.</li>
+                        <li><strong>Parallelizable:</strong> Can encrypt/decrypt multiple blocks in parallel.</li>
+                    </ul>
+                    
+                    <h5>XSalsa20:</h5>
+                    <p>XSalsa20 is an extended version of Salsa20 that uses a 192-bit nonce instead of the original 64-bit nonce. This allows for a much larger number of different keystreams from a single key, making it suitable for applications where nonce reuse is a concern.</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Salsa20 is often used in combination with Poly1305 (as in the NaCl/libsodium libraries) to provide authenticated encryption, ensuring both confidentiality and integrity of the data.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+document.getElementById('generateKey').addEventListener('click', async () => {
+    try {
+        const keySize = document.getElementById('keySize').value;
+        const response = await fetch('/generate-salsa20-key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ key_size: keySize })
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('secretKey').innerText = data.key;
+        document.getElementById('nonce').innerText = data.nonce;
+        document.getElementById('keyOutput').classList.remove('d-none');
+    } catch (error) {
+        alert('Error generating key: ' + error.message);
+    }
+});
+
+document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('encryptFile').files[0];
+    const key = document.getElementById('encryptKey').value;
+    const nonce = document.getElementById('encryptNonce').value;
+    
+    if (!file || !key || !nonce) {
+        alert('Please select a file and enter the key and nonce');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('key', key);
+    formData.append('nonce', nonce);
+    
+    try {
+        const response = await fetch('/symmetric/salsa20/encrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'salsa20_encrypted_' + file.name;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to encrypt file');
+        }
+    } catch (error) {
+        alert('Error encrypting file: ' + error.message);
+    }
+});
+
+document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('decryptFile').files[0];
+    const key = document.getElementById('decryptKey').value;
+    const nonce = document.getElementById('decryptNonce').value;
+    
+    if (!file || !key || !nonce) {
+        alert('Please select a file and enter the key and nonce');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('key', key);
+    formData.append('nonce', nonce);
+    
+    try {
+        const response = await fetch('/symmetric/salsa20/decrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'decrypted_' + file.name.replace('salsa20_encrypted_', '');
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to decrypt file');
+        }
+    } catch (error) {
+        alert('Error decrypting file: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

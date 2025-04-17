@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CryptoViz{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-section {
+            background-color: #f8f9fa;
+            padding: 60px 0;
+            margin-bottom: 30px;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .content-wrapper {
+            flex: 1;
+        }
+
+        footer {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+
+        {% block additional_styles %}{% endblock %}
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">CryptoViz</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if 'symmetric' in request.path %}active{% endif %}" href="#" id="symmetricDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Symmetric Encryption
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="symmetricDropdown">
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/aes' %}active{% endif %}" href="/symmetric/aes">AES Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/des' %}active{% endif %}" href="/symmetric/des">DES Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/3des' %}active{% endif %}" href="/symmetric/3des">Triple DES (3DES)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/blowfish' %}active{% endif %}" href="/symmetric/blowfish">Blowfish Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/twofish' %}active{% endif %}" href="/symmetric/twofish">Twofish Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/rc4' %}active{% endif %}" href="/symmetric/rc4">RC4 Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/rc5' %}active{% endif %}" href="/symmetric/rc5">RC5 Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/rc6' %}active{% endif %}" href="/symmetric/rc6">RC6 Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/chacha20' %}active{% endif %}" href="/symmetric/chacha20">ChaCha20 Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/salsa20' %}active{% endif %}" href="/symmetric/salsa20">Salsa20/XSalsa20</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/camellia' %}active{% endif %}" href="/symmetric/camellia">Camellia Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/serpent' %}active{% endif %}" href="/symmetric/serpent">Serpent Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/cast' %}active{% endif %}" href="/symmetric/cast">CAST-128/CAST-256</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/idea' %}active{% endif %}" href="/symmetric/idea">IDEA Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/skipjack' %}active{% endif %}" href="/symmetric/skipjack">Skipjack Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/symmetric/xtea' %}active{% endif %}" href="/symmetric/xtea">XTEA Encryption</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if 'asymmetric' in request.path %}active{% endif %}" href="#" id="asymmetricDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Asymmetric Encryption
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="asymmetricDropdown">
+                            <li><a class="dropdown-item {% if request.path == '/asymmetric/rsa' %}active{% endif %}" href="/asymmetric/rsa">RSA Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/asymmetric/ecc' %}active{% endif %}" href="/asymmetric/ecc">ECC Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/asymmetric/dsa' %}active{% endif %}" href="/asymmetric/dsa">DSA Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/asymmetric/elgamal' %}active{% endif %}" href="/asymmetric/elgamal">ElGamal Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/asymmetric/ntru' %}active{% endif %}" href="/asymmetric/ntru">NTRU Encryption</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/asymmetric/mceliece' %}active{% endif %}" href="/asymmetric/mceliece">McEliece Encryption</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if 'hash' in request.path %}active{% endif %}" href="#" id="hashDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Hash Functions
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="hashDropdown">
+                            <li><a class="dropdown-item {% if request.path == '/hash/md5' %}active{% endif %}" href="/hash/md5">MD5 Hash</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/hash/sha' %}active{% endif %}" href="/hash/sha">SHA-1/SHA-2 Hash</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/hash/sha3' %}active{% endif %}" href="/hash/sha3">SHA-3 Hash</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/hash/bcrypt' %}active{% endif %}" href="/hash/bcrypt">Bcrypt Hash</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/hash/argon2' %}active{% endif %}" href="/hash/argon2">Argon2 Hash</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/hash/blake2' %}active{% endif %}" href="/hash/blake2">BLAKE2 Hash</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/hash/poly1305' %}active{% endif %}" href="/hash/poly1305">Poly1305 MAC</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if 'quantum' in request.path %}active{% endif %}" href="#" id="quantumDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Quantum-Safe Crypto
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="quantumDropdown">
+                            <li><a class="dropdown-item {% if request.path == '/quantum/kyber' %}active{% endif %}" href="/quantum/kyber">Kyber (Key Exchange)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/dilithium' %}active{% endif %}" href="/quantum/dilithium">Dilithium (Signatures)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/falcon' %}active{% endif %}" href="/quantum/falcon">Falcon (Signatures)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/sphincs' %}active{% endif %}" href="/quantum/sphincs">SPHINCS+ (Signatures)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/bike' %}active{% endif %}" href="/quantum/bike">BIKE (Key Exchange)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/sike' %}active{% endif %}" href="/quantum/sike">SIKE (Key Exchange)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/ntru' %}active{% endif %}" href="/quantum/ntru">NTRU (Encryption)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/gemss' %}active{% endif %}" href="/quantum/gemss">GeMSS (Signatures)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/picnic' %}active{% endif %}" href="/quantum/picnic">Picnic (Signatures)</a></li>
+                            <li><a class="dropdown-item {% if request.path == '/quantum/rainbow' %}active{% endif %}" href="/quantum/rainbow">Rainbow (Signatures)</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <footer class="bg-dark text-light py-3 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">Created by <a href="http://vijaykarthiktk.vercel.app"
+                    class="text-light text-decoration-underline">Vijay Karthik</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

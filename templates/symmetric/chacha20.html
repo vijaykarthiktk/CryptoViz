@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}ChaCha20 Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.file-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">ChaCha20 Encryption</h1>
+                <p class="lead">ChaCha20 is a modern stream cipher designed by Daniel J. Bernstein, known for its high
+                    performance and security.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a secure key and nonce for ChaCha20 encryption</p>
+                    <button id="generateKey" class="btn btn-primary mb-3">Generate Key & Nonce</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="secretKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Nonce</label>
+                                    <div class="key-text border rounded p-2" id="nonce"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('nonce')">Copy Nonce</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with ChaCha20</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nonce</label>
+                            <textarea class="form-control" id="encryptNonce" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with ChaCha20</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nonce</label>
+                            <textarea class="form-control" id="decryptNonce" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About ChaCha20 Encryption</h4>
+                    <p>ChaCha20 is a modern stream cipher designed by Daniel J. Bernstein in 2008. It's an evolution of
+                        the Salsa20 cipher, with improved diffusion and resistance against certain attacks.</p>
+                    <ul>
+                        <li>ChaCha20 uses a 256-bit key and a 96-bit nonce (number used once).</li>
+                        <li>It's a stream cipher that generates a keystream which is XORed with the plaintext to produce
+                            ciphertext.</li>
+                        <li>ChaCha20 is designed to be highly resistant to timing attacks and other side-channel
+                            attacks.</li>
+                        <li>It's particularly efficient in software implementations, especially on CPUs without
+                            dedicated AES instructions.</li>
+                    </ul>
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Performance:</strong> ChaCha20 is extremely fast in software, often outperforming
+                            AES on platforms without hardware acceleration.</li>
+                        <li><strong>Security:</strong> No practical attacks have been found against ChaCha20 with its
+                            full 20 rounds.</li>
+                        <li><strong>Simplicity:</strong> The algorithm is relatively simple, making it easier to
+                            implement correctly and audit.</li>
+                        <li><strong>Constant-time operation:</strong> ChaCha20 operations take the same amount of time
+                            regardless of the data being processed, which helps prevent timing attacks.</li>
+                    </ul>
+                    <h5>Modern Usage:</h5>
+                    <p>ChaCha20 is often used in combination with the Poly1305 message authentication code, forming the
+                        ChaCha20-Poly1305 authenticated encryption scheme. This combination is used in several important
+                        protocols:</p>
+                    <ul>
+                        <li>TLS 1.3 includes ChaCha20-Poly1305 as a mandatory-to-implement cipher suite.</li>
+                        <li>It's used in WireGuard VPN protocol.</li>
+                        <li>Signal Protocol uses ChaCha20 for its encrypted messaging.</li>
+                        <li>SSH implementations often support ChaCha20-Poly1305.</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> ChaCha20, like all stream ciphers, should never reuse the same key and
+                        nonce combination. Doing so would completely compromise security. Always use a fresh nonce for
+                        each encryption operation with the same key.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKey').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/generate-chacha20-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            const data = await response.json();
+
+            document.getElementById('secretKey').innerText = data.key;
+            document.getElementById('nonce').innerText = data.nonce;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating key: ' + error.message);
+        }
+    });
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('encryptFile').files[0];
+        const key = document.getElementById('encryptKey').value;
+        const nonce = document.getElementById('encryptNonce').value;
+
+        if (!file || !key || !nonce) {
+            alert('Please select a file and enter the key and nonce');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+        formData.append('nonce', nonce);
+
+        try {
+            const response = await fetch('/symmetric/chacha20/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'chacha20_encrypted_' + file.name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('decryptFile').files[0];
+        const key = document.getElementById('decryptKey').value;
+        const nonce = document.getElementById('decryptNonce').value;
+
+        if (!file || !key || !nonce) {
+            alert('Please select a file and enter the key and nonce');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+        formData.append('nonce', nonce);
+
+        try {
+            const response = await fetch('/symmetric/chacha20/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('chacha20_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

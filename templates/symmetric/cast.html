@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+
+{% block title %}CAST Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.file-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">CAST Encryption</h1>
+                <p class="lead">CAST is a family of block ciphers developed by Carlisle Adams and Stafford Tavares.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a secure key and initialization vector (IV) for CAST encryption</p>
+                    <div class="col mb-2">
+                        <div class="col-md-4">
+                            <label class="form-label">CAST Variant</label>
+                            <select class="form-select" id="castVariant">
+                                <option value="cast5" selected>CAST-128 (CAST-5)</option>
+                                <option value="cast6">CAST-256 (CAST-6)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Key Size</label>
+                            <select class="form-select" id="keySize">
+                                <option value="40">40-bit (CAST-128 only)</option>
+                                <option value="64">64-bit (CAST-128 only)</option>
+                                <option value="80">80-bit (CAST-128 only)</option>
+                                <option value="128" selected>128-bit</option>
+                                <option value="160">160-bit (CAST-256 only)</option>
+                                <option value="192">192-bit (CAST-256 only)</option>
+                                <option value="224">224-bit (CAST-256 only)</option>
+                                <option value="256">256-bit (CAST-256 only)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKey" class="btn btn-primary mb-3">Generate Key & IV</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="secretKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initialization Vector (IV)</label>
+                                    <div class="key-text border rounded p-2" id="iv"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('iv')">Copy
+                                        IV</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with CAST</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">CAST Variant</label>
+                            <select class="form-select" id="encryptVariant">
+                                <option value="cast5" selected>CAST-128 (CAST-5)</option>
+                                <option value="cast6">CAST-256 (CAST-6)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initialization Vector (IV)</label>
+                            <textarea class="form-control" id="encryptIV" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with CAST</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">CAST Variant</label>
+                            <select class="form-select" id="decryptVariant">
+                                <option value="cast5" selected>CAST-128 (CAST-5)</option>
+                                <option value="cast6">CAST-256 (CAST-6)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initialization Vector (IV)</label>
+                            <textarea class="form-control" id="decryptIV" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About CAST Encryption</h4>
+                    <p>CAST is a family of block ciphers designed by Carlisle Adams and Stafford Tavares (hence the name
+                        CAST) in 1996. The most widely used variants are CAST-128 (also known as CAST-5) and CAST-256
+                        (also known as CAST-6).</p>
+
+                    <h5>CAST-128 (CAST-5):</h5>
+                    <ul>
+                        <li><strong>Block Size:</strong> 64 bits</li>
+                        <li><strong>Key Size:</strong> 40 to 128 bits (in 8-bit increments)</li>
+                        <li><strong>Rounds:</strong> 12 or 16 rounds (depending on key size)</li>
+                        <li><strong>Structure:</strong> Feistel network with complex round function</li>
+                        <li><strong>Status:</strong> Standardized in RFC 2144 and used in various applications including
+                            PGP</li>
+                    </ul>
+
+                    <h5>CAST-256 (CAST-6):</h5>
+                    <ul>
+                        <li><strong>Block Size:</strong> 128 bits</li>
+                        <li><strong>Key Size:</strong> 128, 160, 192, 224, or 256 bits</li>
+                        <li><strong>Rounds:</strong> 48 rounds (12 quad-rounds)</li>
+                        <li><strong>Structure:</strong> Substitution-permutation network (SPN)</li>
+                        <li><strong>Status:</strong> Submitted as a candidate for the AES competition but not selected
+                            as a finalist</li>
+                    </ul>
+
+                    <h5>How CAST Works:</h5>
+                    <p><strong>CAST-128:</strong></p>
+                    <ol>
+                        <li>Uses a Feistel network structure with 16 rounds for 128-bit keys (12 rounds for shorter
+                            keys)</li>
+                        <li>Each round uses one of four different round functions, which include operations like:
+                            <ul>
+                                <li>Modular addition and subtraction</li>
+                                <li>XOR operations</li>
+                                <li>Fixed S-boxes (substitution boxes)</li>
+                                <li>Circular rotations</li>
+                            </ul>
+                        </li>
+                        <li>The key schedule generates 16 subkeys of 32 bits each, plus 16 rotation values</li>
+                    </ol>
+
+                    <p><strong>CAST-256:</strong></p>
+                    <ol>
+                        <li>Extends CAST-128 to handle 128-bit blocks and longer keys</li>
+                        <li>Uses a substitution-permutation network with 48 rounds organized as 12 "quad-rounds"</li>
+                        <li>Each quad-round applies four different round functions to different parts of the data</li>
+                        <li>Uses the same basic operations as CAST-128 but with a more complex structure</li>
+                    </ol>
+
+                    <h5>Security and Applications:</h5>
+                    <ul>
+                        <li><strong>Security:</strong> CAST-128 has withstood cryptanalysis well, with no practical
+                            attacks against the full cipher. CAST-256 was designed with an even higher security margin.
+                        </li>
+                        <li><strong>Applications:</strong> CAST-128 has been used in various security applications,
+                            including:
+                            <ul>
+                                <li>Pretty Good Privacy (PGP) for email encryption</li>
+                                <li>GNU Privacy Guard (GPG)</li>
+                                <li>Various VPN implementations</li>
+                            </ul>
+                        </li>
+                        <li><strong>Licensing:</strong> CAST-128 was patented, but the patents have expired, making it
+                            free to use. CAST-256 is also free to use.</li>
+                    </ul>
+
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> While CAST-128 is still considered secure for many applications, modern
+                        systems typically prefer AES or other newer ciphers with larger block sizes for new
+                        implementations.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update key size options based on selected CAST variant
+    document.getElementById('castVariant').addEventListener('change', function () {
+        const variant = this.value;
+        const keySizeSelect = document.getElementById('keySize');
+        const currentSize = keySizeSelect.value;
+
+        // Clear existing options
+        keySizeSelect.innerHTML = '';
+
+        // Add options based on variant
+        if (variant === 'cast5') {
+            // CAST-128 supports 40 to 128 bits
+            [40, 64, 80, 128].forEach(size => {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size + '-bit';
+                if (size === 128) option.selected = true;
+                keySizeSelect.appendChild(option);
+            });
+        } else {
+            // CAST-256 supports 128 to 256 bits
+            [128, 160, 192, 224, 256].forEach(size => {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size + '-bit';
+                if (size === 256) option.selected = true;
+                keySizeSelect.appendChild(option);
+            });
+        }
+    });
+
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKey').addEventListener('click', async () => {
+        try {
+            const variant = document.getElementById('castVariant').value;
+            const keySize = document.getElementById('keySize').value;
+            const response = await fetch('/generate-cast-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    variant: variant,
+                    key_size: keySize
+                })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('secretKey').innerText = data.key;
+            document.getElementById('iv').innerText = data.iv;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating key: ' + error.message);
+        }
+    });
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const variant = document.getElementById('encryptVariant').value;
+        const file = document.getElementById('encryptFile').files[0];
+        const key = document.getElementById('encryptKey').value;
+        const iv = document.getElementById('encryptIV').value;
+
+        if (!file || !key || !iv) {
+            alert('Please select a file and enter the key and IV');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+        formData.append('iv', iv);
+        formData.append('variant', variant);
+
+        try {
+            const response = await fetch('/symmetric/cast/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cast_encrypted_' + file.name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const variant = document.getElementById('decryptVariant').value;
+        const file = document.getElementById('decryptFile').files[0];
+        const key = document.getElementById('decryptKey').value;
+        const iv = document.getElementById('decryptIV').value;
+
+        if (!file || !key || !iv) {
+            alert('Please select a file and enter the key and IV');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+        formData.append('iv', iv);
+        formData.append('variant', variant);
+
+        try {
+            const response = await fetch('/symmetric/cast/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('cast_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

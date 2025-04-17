@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}ElGamal Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">ElGamal Encryption</h1>
+                <p class="lead">ElGamal is an asymmetric key encryption algorithm based on the Diffie-Hellman key exchange and the discrete logarithm problem.</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a new ElGamal key pair for encryption and decryption</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Key Size</label>
+                            <select class="form-select" id="keySize">
+                                <option value="1024">1024-bit (Not recommended)</option>
+                                <option value="2048" selected>2048-bit (Standard)</option>
+                                <option value="3072">3072-bit (Stronger)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKeys" class="btn btn-primary mb-3">Generate Key Pair</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Private Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="privateKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Public Key (Share this with others)</label>
+                                    <div class="key-text border rounded p-2" id="publicKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with recipient's public key</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Recipient's Public Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with your private key</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Private Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About ElGamal Encryption</h4>
+                    <p>ElGamal encryption is an asymmetric key encryption algorithm for public-key cryptography which is based on the Diffie-Hellman key exchange. It was described by Taher Elgamal in 1985.</p>
+                    <ul>
+                        <li>ElGamal encryption consists of three components: the key generator, the encryption algorithm, and the decryption algorithm.</li>
+                        <li>The security of the system relies on the difficulty of computing discrete logarithms in a cyclic group.</li>
+                        <li>ElGamal can be used for both encryption and digital signatures, though its signature scheme is less commonly used today.</li>
+                        <li>The algorithm is in the public domain and can be freely used.</li>
+                    </ul>
+                    <h5>How ElGamal Works:</h5>
+                    <ol>
+                        <li><strong>Key Generation:</strong>
+                            <ul>
+                                <li>Choose a large prime number p and a generator g of the multiplicative group of integers modulo p.</li>
+                                <li>Select a random integer x (the private key) between 1 and p-2.</li>
+                                <li>Compute h = g^x mod p (the public key).</li>
+                                <li>The public key is (p, g, h), and the private key is x.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Encryption:</strong>
+                            <ul>
+                                <li>To encrypt a message m, choose a random integer y between 1 and p-2.</li>
+                                <li>Compute c₁ = g^y mod p.</li>
+                                <li>Compute s = h^y mod p.</li>
+                                <li>Compute c₂ = m × s mod p.</li>
+                                <li>The ciphertext is (c₁, c₂).</li>
+                            </ul>
+                        </li>
+                        <li><strong>Decryption:</strong>
+                            <ul>
+                                <li>Compute s = c₁^x mod p.</li>
+                                <li>Compute m = c₂ × s^(-1) mod p, where s^(-1) is the modular multiplicative inverse of s modulo p.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <h5>Characteristics of ElGamal:</h5>
+                    <ul>
+                        <li><strong>Probabilistic Encryption:</strong> ElGamal is a probabilistic encryption scheme, meaning that encrypting the same message multiple times will yield different ciphertexts.</li>
+                        <li><strong>Ciphertext Expansion:</strong> The ciphertext is twice the size of the plaintext, which can be a disadvantage in some applications.</li>
+                        <li><strong>Computational Overhead:</strong> ElGamal is computationally more intensive than some other asymmetric algorithms like RSA.</li>
+                        <li><strong>Security:</strong> The security is based on the discrete logarithm problem, which is believed to be computationally hard.</li>
+                    </ul>
+                    <h5>Comparison with RSA:</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>ElGamal</th>
+                                <th>RSA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Security Basis</td>
+                                <td>Discrete Logarithm Problem</td>
+                                <td>Integer Factorization Problem</td>
+                            </tr>
+                            <tr>
+                                <td>Ciphertext Size</td>
+                                <td>Twice the plaintext size</td>
+                                <td>Same as key size</td>
+                            </tr>
+                            <tr>
+                                <td>Encryption Speed</td>
+                                <td>Slower</td>
+                                <td>Faster</td>
+                            </tr>
+                            <tr>
+                                <td>Decryption Speed</td>
+                                <td>Slower</td>
+                                <td>Faster</td>
+                            </tr>
+                            <tr>
+                                <td>Probabilistic</td>
+                                <td>Yes (more secure against certain attacks)</td>
+                                <td>No (unless using padding schemes)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='elgamal.js') }}"></script>
+{% endblock %}

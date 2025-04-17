@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}DES Encryption{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">DES Encryption</h1>
+                <p class="lead">Data Encryption Standard (DES) is a symmetric-key algorithm for the encryption of
+                    digital data.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="key-container">
+                            <h4>Key Generation</h4>
+                            <p class="text-muted">Generate a secure key and initialization vector (IV) for DES
+                                encryption</p>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">DES Mode</label>
+                                    <select class="form-select" id="desMode">
+                                        <option value="des">DES (64-bit key)</option>
+                                        <option value="3des" selected>Triple DES (168-bit key)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button id="generateKey" class="btn btn-primary mb-3">Generate Key & IV</button>
+                            <div id="keyOutput" class="d-none">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Secret Key (Keep this secure!)</label>
+                                            <div class="key-text border rounded p-2" id="secretKey"></div>
+                                            <button class="btn btn-sm btn-secondary mt-2"
+                                                onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Initialization Vector (IV)</label>
+                                            <div class="key-text border rounded p-2" id="iv"></div>
+                                            <button class="btn btn-sm btn-secondary mt-2"
+                                                onclick="copyToClipboard('iv')">Copy
+                                                IV</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="file-container">
+                            <h4>Encrypt File</h4>
+                            <p class="text-muted">Upload a file and encrypt it with DES</p>
+                            <form id="encryptForm">
+                                <div class="mb-3">
+                                    <label class="form-label">File to Encrypt</label>
+                                    <input type="file" class="form-control" id="encryptFile" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">DES Mode</label>
+                                    <select class="form-select" id="encryptMode">
+                                        <option value="des">DES</option>
+                                        <option value="3des" selected>Triple DES</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key</label>
+                                    <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Initialization Vector (IV)</label>
+                                    <textarea class="form-control" id="encryptIV" rows="2" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="file-container">
+                            <h4>Decrypt File</h4>
+                            <p class="text-muted">Upload an encrypted file and decrypt it with DES</p>
+                            <form id="decryptForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Encrypted File</label>
+                                    <input type="file" class="form-control" id="decryptFile" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">DES Mode</label>
+                                    <select class="form-select" id="decryptMode">
+                                        <option value="des">DES</option>
+                                        <option value="3des" selected>Triple DES</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key</label>
+                                    <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Initialization Vector (IV)</label>
+                                    <textarea class="form-control" id="decryptIV" rows="2" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h4>About DES Encryption</h4>
+                        <p>The Data Encryption Standard (DES) is a symmetric-key algorithm for the encryption of
+                            digital data. Although its short key length of 56 bits makes it too insecure for modern
+                            applications, it was highly influential in the advancement of cryptography.</p>
+                        <ul>
+                            <li>DES is a block cipher that operates on 64-bit blocks of data.</li>
+                            <li>It uses a 56-bit key (technically 64 bits, but 8 bits are used for parity checking).
+                            </li>
+                            <li>Due to its vulnerability to brute force attacks, Triple DES (3DES) was developed as a
+                                more secure variant.</li>
+                        </ul>
+                        <h5>Triple DES (3DES):</h5>
+                        <p>Triple DES applies the DES algorithm three times to each data block:</p>
+                        <ol>
+                            <li>Encrypt with key 1</li>
+                            <li>Decrypt with key 2</li>
+                            <li>Encrypt with key 3</li>
+                        </ol>
+                        <p>This provides a key length of 168 bits (3 × 56 bits), making it much more resistant to brute
+                            force attacks than standard DES.</p>
+                        <div class="alert alert-warning">
+                            <strong>Security Note:</strong> While Triple DES is more secure than DES, it is considered
+                            legacy technology. For new applications, AES is recommended as it offers better security and
+                            performance.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        document.getElementById('generateKey').addEventListener('click', async () => {
+            try {
+                const desMode = document.getElementById('desMode').value;
+                const response = await fetch('/generate-des-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mode: desMode })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('secretKey').innerText = data.key;
+                document.getElementById('iv').innerText = data.iv;
+                document.getElementById('keyOutput').classList.remove('d-none');
+            } catch (error) {
+                alert('Error generating key: ' + error.message);
+            }
+        });
+
+        document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = document.getElementById('encryptFile').files[0];
+            const mode = document.getElementById('encryptMode').value;
+            const key = document.getElementById('encryptKey').value;
+            const iv = document.getElementById('encryptIV').value;
+
+            if (!file || !key || !iv) {
+                alert('Please select a file and enter the key and IV');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('mode', mode);
+            formData.append('key', key);
+            formData.append('iv', iv);
+
+            try {
+                const response = await fetch('/symmetric/des/encrypt', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'des_encrypted_' + file.name;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to encrypt file');
+                }
+            } catch (error) {
+                alert('Error encrypting file: ' + error.message);
+            }
+        });
+
+        document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = document.getElementById('decryptFile').files[0];
+            const mode = document.getElementById('decryptMode').value;
+            const key = document.getElementById('decryptKey').value;
+            const iv = document.getElementById('decryptIV').value;
+
+            if (!file || !key || !iv) {
+                alert('Please select a file and enter the key and IV');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('mode', mode);
+            formData.append('key', key);
+            formData.append('iv', iv);
+
+            try {
+                const response = await fetch('/symmetric/des/decrypt', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'decrypted_' + file.name.replace('des_encrypted_', '');
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to decrypt file');
+                }
+            } catch (error) {
+                alert('Error decrypting file: ' + error.message);
+            }
+        });
+    </script>
+    {% endblock %}

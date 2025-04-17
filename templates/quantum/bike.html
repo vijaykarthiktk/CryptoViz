@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+
+{% block title %}BIKE - Quantum-Safe Key Exchange{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">BIKE - Quantum-Safe Key Exchange</h1>
+                <p class="lead">BIKE (Bit Flipping Key Encapsulation) is a code-based key encapsulation mechanism designed to be secure against quantum computer attacks.</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a BIKE key pair for key encapsulation</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Security Level</label>
+                            <select class="form-select" id="securityLevel">
+                                <option value="bike-1">BIKE-1 (NIST Level 1, 128-bit security)</option>
+                                <option value="bike-3" selected>BIKE-3 (NIST Level 3, 192-bit security)</option>
+                                <option value="bike-5">BIKE-5 (NIST Level 5, 256-bit security)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKeys" class="btn btn-primary mb-3">Generate Key Pair</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Private Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="privateKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Public Key (Share this with others)</label>
+                                    <div class="key-text border rounded p-2" id="publicKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with recipient's public key</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Recipient's Public Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Security Level</label>
+                            <select class="form-select" id="encryptSecurityLevel">
+                                <option value="bike-1">BIKE-1 (NIST Level 1, 128-bit security)</option>
+                                <option value="bike-3" selected>BIKE-3 (NIST Level 3, 192-bit security)</option>
+                                <option value="bike-5">BIKE-5 (NIST Level 5, 256-bit security)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with your private key</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Private Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Security Level</label>
+                            <select class="form-select" id="decryptSecurityLevel">
+                                <option value="bike-1">BIKE-1 (NIST Level 1, 128-bit security)</option>
+                                <option value="bike-3" selected>BIKE-3 (NIST Level 3, 192-bit security)</option>
+                                <option value="bike-5">BIKE-5 (NIST Level 5, 256-bit security)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About BIKE</h4>
+                    <p>BIKE (Bit Flipping Key Encapsulation) is a code-based key encapsulation mechanism (KEM) designed to be secure against attacks from quantum computers. It was an alternate candidate in the NIST Post-Quantum Cryptography standardization process.</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Type:</strong> Code-based key encapsulation mechanism (KEM)</li>
+                        <li><strong>Security Basis:</strong> Quasi-Cyclic Moderate Density Parity-Check (QC-MDPC) codes</li>
+                        <li><strong>Quantum Resistance:</strong> Designed to be secure against quantum computer attacks</li>
+                        <li><strong>Key Sizes:</strong> Relatively compact compared to other code-based schemes</li>
+                        <li><strong>Performance:</strong> Efficient key generation, encapsulation, and decapsulation operations</li>
+                    </ul>
+                    
+                    <h5>How BIKE Works:</h5>
+                    <ol>
+                        <li><strong>Key Generation:</strong>
+                            <ul>
+                                <li>Generate two sparse binary polynomials h₀ and h₁</li>
+                                <li>Compute h = h₁ · h₀⁻¹ in a polynomial ring</li>
+                                <li>Public key: h</li>
+                                <li>Private key: (h₀, h₁)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Encapsulation (Generating a Shared Secret):</strong>
+                            <ul>
+                                <li>Generate a random error vector e</li>
+                                <li>Compute the syndrome s = h · e</li>
+                                <li>Derive a shared secret K from e</li>
+                                <li>Ciphertext: s</li>
+                            </ul>
+                        </li>
+                        <li><strong>Decapsulation (Recovering the Shared Secret):</strong>
+                            <ul>
+                                <li>Use the private key to decode the syndrome s and recover e</li>
+                                <li>Derive the same shared secret K from e</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <h5>Security and Advantages:</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Security Basis</td>
+                                <td>Based on the hardness of decoding random linear codes, a problem believed to be resistant to quantum attacks</td>
+                            </tr>
+                            <tr>
+                                <td>Key Size</td>
+                                <td>Smaller public and private keys compared to some other post-quantum schemes</td>
+                            </tr>
+                            <tr>
+                                <td>Performance</td>
+                                <td>Efficient operations suitable for various applications, including constrained environments</td>
+                            </tr>
+                            <tr>
+                                <td>Implementation</td>
+                                <td>Relatively simple implementation with potential for optimization</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h5>Variants and Parameters:</h5>
+                    <ul>
+                        <li><strong>BIKE-1:</strong> Designed for NIST Security Level 1 (equivalent to AES-128)</li>
+                        <li><strong>BIKE-3:</strong> Designed for NIST Security Level 3 (equivalent to AES-192)</li>
+                        <li><strong>BIKE-5:</strong> Designed for NIST Security Level 5 (equivalent to AES-256)</li>
+                    </ul>
+                    
+                    <h5>Applications:</h5>
+                    <ul>
+                        <li><strong>Key Exchange:</strong> Establishing shared secrets for symmetric encryption</li>
+                        <li><strong>Hybrid Cryptography:</strong> Combining with classical algorithms for transition to post-quantum security</li>
+                        <li><strong>TLS and Secure Communications:</strong> Potential use in future quantum-resistant communication protocols</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> While BIKE was not selected as a primary standard by NIST, it remains a promising post-quantum algorithm with ongoing research and development. Its code-based approach provides diversity in post-quantum cryptography, complementing other approaches like lattice-based cryptography (e.g., Kyber).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.innerText || element.value;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+// Sync security level selections
+document.getElementById('securityLevel').addEventListener('change', function() {
+    document.getElementById('encryptSecurityLevel').value = this.value;
+    document.getElementById('decryptSecurityLevel').value = this.value;
+});
+
+document.getElementById('generateKeys').addEventListener('click', async () => {
+    try {
+        const securityLevel = document.getElementById('securityLevel').value;
+        
+        // Show loading indicator
+        document.getElementById('generateKeys').disabled = true;
+        document.getElementById('generateKeys').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+        
+        const response = await fetch('/quantum/bike/generate-keys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ security_level: securityLevel })
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('privateKey').innerText = data.private_key;
+        document.getElementById('publicKey').innerText = data.public_key;
+        document.getElementById('keyOutput').classList.remove('d-none');
+        
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    } catch (error) {
+        alert('Error generating keys: ' + error.message);
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    }
+});
+
+document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('encryptFile').files[0];
+    const publicKey = document.getElementById('encryptKey').value;
+    const securityLevel = document.getElementById('encryptSecurityLevel').value;
+    
+    if (!file || !publicKey) {
+        alert('Please select a file and enter the public key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('public_key', publicKey);
+    formData.append('security_level', securityLevel);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#encryptForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Encrypting...';
+        
+        const response = await fetch('/quantum/bike/encrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bike_encrypted_' + file.name;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to encrypt file');
+        }
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Encrypt & Download';
+    } catch (error) {
+        alert('Error encrypting file: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#encryptForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Encrypt & Download';
+    }
+});
+
+document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('decryptFile').files[0];
+    const privateKey = document.getElementById('decryptKey').value;
+    const securityLevel = document.getElementById('decryptSecurityLevel').value;
+    
+    if (!file || !privateKey) {
+        alert('Please select a file and enter your private key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('private_key', privateKey);
+    formData.append('security_level', securityLevel);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#decryptForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Decrypting...';
+        
+        const response = await fetch('/quantum/bike/decrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'decrypted_' + file.name.replace('bike_encrypted_', '');
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to decrypt file');
+        }
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Decrypt & Download';
+    } catch (error) {
+        alert('Error decrypting file: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#decryptForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Decrypt & Download';
+    }
+});
+</script>
+{% endblock %}

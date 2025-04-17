@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block title %}SHA Hash{% endblock %}
+
+{% block additional_styles %}
+.hash-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.hash-result {
+font-family: monospace;
+font-size: 1.2rem;
+word-break: break-all;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">SHA Hash Generator</h1>
+            <p class="lead">Generate SHA hash values for text or files using various SHA algorithms.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="hash-container">
+                <h4>Text Hash</h4>
+                <p class="text-muted">Generate a SHA hash from text input</p>
+                <form id="textHashForm">
+                    <div class="mb-3">
+                        <label class="form-label">SHA Algorithm</label>
+                        <select class="form-select" id="textHashAlgorithm">
+                            <option value="sha1">SHA-1 (160 bits)</option>
+                            <option value="sha224">SHA-224 (224 bits)</option>
+                            <option value="sha256" selected>SHA-256 (256 bits)</option>
+                            <option value="sha384">SHA-384 (384 bits)</option>
+                            <option value="sha512">SHA-512 (512 bits)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Text to Hash</label>
+                        <textarea class="form-control" id="textInput" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Hash</button>
+                </form>
+                <div id="textHashResult" class="mt-3 d-none">
+                    <h5>SHA Hash:</h5>
+                    <div class="hash-result p-2 border rounded bg-light" id="textHashValue"></div>
+                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('textHashValue')">Copy
+                        Hash</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="hash-container">
+                <h4>File Hash</h4>
+                <p class="text-muted">Generate a SHA hash from a file</p>
+                <form id="fileHashForm">
+                    <div class="mb-3">
+                        <label class="form-label">SHA Algorithm</label>
+                        <select class="form-select" id="fileHashAlgorithm">
+                            <option value="sha1">SHA-1 (160 bits)</option>
+                            <option value="sha224">SHA-224 (224 bits)</option>
+                            <option value="sha256" selected>SHA-256 (256 bits)</option>
+                            <option value="sha384">SHA-384 (384 bits)</option>
+                            <option value="sha512">SHA-512 (512 bits)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">File to Hash</label>
+                        <input type="file" class="form-control" id="fileInput" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Hash</button>
+                </form>
+                <div id="fileHashResult" class="mt-3 d-none">
+                    <h5>SHA Hash:</h5>
+                    <div class="hash-result p-2 border rounded bg-light" id="fileHashValue"></div>
+                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('fileHashValue')">Copy
+                        Hash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="hash-container mt-4">
+                <h4>Hash Verification</h4>
+                <p class="text-muted">Verify if two SHA hashes match</p>
+                <form id="verifyHashForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">First Hash</label>
+                                <input type="text" class="form-control" id="hash1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Second Hash</label>
+                                <input type="text" class="form-control" id="hash2" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verify Hashes</button>
+                </form>
+                <div id="verifyResult" class="mt-3 d-none">
+                    <div class="alert" id="verifyAlert"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="info-section">
+                <h4>About SHA Hash Functions</h4>
+                <p>The Secure Hash Algorithms (SHA) are a family of cryptographic hash functions published by the
+                    National Institute of Standards and Technology (NIST) as a U.S. Federal Information Processing
+                    Standard (FIPS).</p>
+
+                <h5>SHA Variants:</h5>
+                <ul>
+                    <li><strong>SHA-1:</strong> Produces a 160-bit (20-byte) hash value. It is no longer considered
+                        secure against well-funded attackers.</li>
+                    <li><strong>SHA-2 Family:</strong> Includes SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, and
+                        SHA-512/256. These are considered secure and widely used.</li>
+                    <li><strong>SHA-3 Family:</strong> The newest member of the SHA family, based on the Keccak
+                        algorithm. Includes SHA3-224, SHA3-256, SHA3-384, and SHA3-512.</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <strong>Security Note:</strong> SHA-256 and stronger variants are recommended for security-critical
+                    applications. SHA-1 should be avoided for new applications due to demonstrated collision attacks.
+                </div>
+
+                <h5>Common Uses of SHA:</h5>
+                <ul>
+                    <li><strong>Digital Signatures:</strong> Verifying the authenticity and integrity of messages and
+                        documents.</li>
+                    <li><strong>SSL/TLS Certificates:</strong> Ensuring secure connections on the web.</li>
+                    <li><strong>Password Storage:</strong> Storing password hashes (though specialized password hashing
+                        functions like bcrypt are preferred).</li>
+                    <li><strong>File Integrity:</strong> Verifying that files have not been tampered with.</li>
+                    <li><strong>Blockchain Technology:</strong> SHA-256 is used in Bitcoin and many other
+                        cryptocurrencies.</li>
+                </ul>
+
+                <h5>Comparison of SHA Variants:</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>Output Size</th>
+                            <th>Internal State Size</th>
+                            <th>Block Size</th>
+                            <th>Security</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SHA-1</td>
+                            <td>160 bits</td>
+                            <td>160 bits</td>
+                            <td>512 bits</td>
+                            <td>Broken (collision attacks demonstrated)</td>
+                        </tr>
+                        <tr>
+                            <td>SHA-224</td>
+                            <td>224 bits</td>
+                            <td>256 bits</td>
+                            <td>512 bits</td>
+                            <td>Secure</td>
+                        </tr>
+                        <tr>
+                            <td>SHA-256</td>
+                            <td>256 bits</td>
+                            <td>256 bits</td>
+                            <td>512 bits</td>
+                            <td>Secure</td>
+                        </tr>
+                        <tr>
+                            <td>SHA-384</td>
+                            <td>384 bits</td>
+                            <td>512 bits</td>
+                            <td>1024 bits</td>
+                            <td>Secure</td>
+                        </tr>
+                        <tr>
+                            <td>SHA-512</td>
+                            <td>512 bits</td>
+                            <td>512 bits</td>
+                            <td>1024 bits</td>
+                            <td>Secure</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('textHashForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const text = document.getElementById('textInput').value;
+        const algorithm = document.getElementById('textHashAlgorithm').value;
+
+        try {
+            const response = await fetch('/hash/sha/text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    algorithm: algorithm
+                })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('textHashValue').textContent = data.hash;
+            document.getElementById('textHashResult').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating hash: ' + error.message);
+        }
+    });
+
+    document.getElementById('fileHashForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('fileInput').files[0];
+        const algorithm = document.getElementById('fileHashAlgorithm').value;
+
+        if (!file) {
+            alert('Please select a file');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('algorithm', algorithm);
+
+        try {
+            const response = await fetch('/hash/sha/file', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            document.getElementById('fileHashValue').textContent = data.hash;
+            document.getElementById('fileHashResult').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating hash: ' + error.message);
+        }
+    });
+
+    document.getElementById('verifyHashForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const hash1 = document.getElementById('hash1').value.trim().toLowerCase();
+        const hash2 = document.getElementById('hash2').value.trim().toLowerCase();
+
+        const verifyResult = document.getElementById('verifyResult');
+        const verifyAlert = document.getElementById('verifyAlert');
+
+        verifyResult.classList.remove('d-none');
+
+        if (hash1 === hash2) {
+            verifyAlert.className = 'alert alert-success';
+            verifyAlert.textContent = 'The hashes match! This indicates the data is identical.';
+        } else {
+            verifyAlert.className = 'alert alert-danger';
+            verifyAlert.textContent = 'The hashes do not match! This indicates the data is different.';
+        }
+    });
+</script>
+{% endblock %}

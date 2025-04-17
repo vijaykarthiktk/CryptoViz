@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+
+{% block title %}Serpent Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Serpent Encryption</h1>
+                <p class="lead">Serpent is a symmetric key block cipher that was a finalist in the Advanced Encryption Standard (AES) competition.</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a secure key and initialization vector (IV) for Serpent encryption</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Key Size</label>
+                            <select class="form-select" id="keySize">
+                                <option value="128">128-bit</option>
+                                <option value="192">192-bit</option>
+                                <option value="256" selected>256-bit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKey" class="btn btn-primary mb-3">Generate Key & IV</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="secretKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initialization Vector (IV)</label>
+                                    <div class="key-text border rounded p-2" id="iv"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('iv')">Copy IV</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with Serpent</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initialization Vector (IV)</label>
+                            <textarea class="form-control" id="encryptIV" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with Serpent</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initialization Vector (IV)</label>
+                            <textarea class="form-control" id="decryptIV" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About Serpent Encryption</h4>
+                    <p>Serpent is a symmetric key block cipher designed by Ross Anderson, Eli Biham, and Lars Knudsen. It was a finalist in the Advanced Encryption Standard (AES) competition, ultimately coming in second to Rijndael (which became AES).</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Block Size:</strong> 128 bits</li>
+                        <li><strong>Key Sizes:</strong> 128, 192, or 256 bits</li>
+                        <li><strong>Structure:</strong> Substitution-permutation network (SPN)</li>
+                        <li><strong>Rounds:</strong> 32 rounds (compared to AES's 10-14 rounds)</li>
+                        <li><strong>Security Margin:</strong> Designed with a very high security margin, prioritizing security over performance</li>
+                    </ul>
+                    
+                    <h5>How Serpent Works:</h5>
+                    <ol>
+                        <li><strong>Initial Permutation:</strong> The input block is rearranged according to a fixed pattern.</li>
+                        <li><strong>Round Function (32 times):</strong>
+                            <ul>
+                                <li>Key mixing: XOR with round key</li>
+                                <li>S-box substitution: Non-linear substitution using 8 different 4-bit S-boxes</li>
+                                <li>Linear transformation: Mixing of bits to provide diffusion</li>
+                            </ul>
+                        </li>
+                        <li><strong>Final Permutation:</strong> The inverse of the initial permutation is applied.</li>
+                    </ol>
+                    
+                    <h5>Advantages of Serpent:</h5>
+                    <ul>
+                        <li><strong>High Security Margin:</strong> With 32 rounds, Serpent has a much higher security margin than AES.</li>
+                        <li><strong>Conservative Design:</strong> Uses well-understood cryptographic principles and avoids complex mathematical structures.</li>
+                        <li><strong>Resistance to Attacks:</strong> No practical attacks have been found against the full 32-round version.</li>
+                        <li><strong>Bit-slice Implementation:</strong> Can be efficiently implemented using bit-slicing techniques on modern processors.</li>
+                    </ul>
+                    
+                    <h5>Comparison with AES:</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Serpent</th>
+                                <th>AES (Rijndael)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Block Size</td>
+                                <td>128 bits</td>
+                                <td>128 bits</td>
+                            </tr>
+                            <tr>
+                                <td>Key Sizes</td>
+                                <td>128, 192, 256 bits</td>
+                                <td>128, 192, 256 bits</td>
+                            </tr>
+                            <tr>
+                                <td>Rounds</td>
+                                <td>32</td>
+                                <td>10 (128-bit), 12 (192-bit), 14 (256-bit)</td>
+                            </tr>
+                            <tr>
+                                <td>Performance</td>
+                                <td>Slower</td>
+                                <td>Faster</td>
+                            </tr>
+                            <tr>
+                                <td>Security Margin</td>
+                                <td>Higher</td>
+                                <td>Lower</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> While Serpent was not selected as the AES standard, it remains a highly secure cipher and is used in various security applications, particularly those requiring a high security margin. It is often used in disk encryption software like TrueCrypt and VeraCrypt.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+document.getElementById('generateKey').addEventListener('click', async () => {
+    try {
+        const keySize = document.getElementById('keySize').value;
+        const response = await fetch('/generate-serpent-key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ key_size: keySize })
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('secretKey').innerText = data.key;
+        document.getElementById('iv').innerText = data.iv;
+        document.getElementById('keyOutput').classList.remove('d-none');
+    } catch (error) {
+        alert('Error generating key: ' + error.message);
+    }
+});
+
+document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('encryptFile').files[0];
+    const key = document.getElementById('encryptKey').value;
+    const iv = document.getElementById('encryptIV').value;
+    
+    if (!file || !key || !iv) {
+        alert('Please select a file and enter the key and IV');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('key', key);
+    formData.append('iv', iv);
+    
+    try {
+        const response = await fetch('/symmetric/serpent/encrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'serpent_encrypted_' + file.name;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to encrypt file');
+        }
+    } catch (error) {
+        alert('Error encrypting file: ' + error.message);
+    }
+});
+
+document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('decryptFile').files[0];
+    const key = document.getElementById('decryptKey').value;
+    const iv = document.getElementById('decryptIV').value;
+    
+    if (!file || !key || !iv) {
+        alert('Please select a file and enter the key and IV');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('key', key);
+    formData.append('iv', iv);
+    
+    try {
+        const response = await fetch('/symmetric/serpent/decrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'decrypted_' + file.name.replace('serpent_encrypted_', '');
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to decrypt file');
+        }
+    } catch (error) {
+        alert('Error decrypting file: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

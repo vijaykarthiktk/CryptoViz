@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+
+{% block title %}Poly1305 MAC{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.file-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Poly1305 Message Authentication Code</h1>
+            <p class="lead">Poly1305 is a cryptographic message authentication code (MAC) used to verify data integrity
+                and authenticity.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="key-container">
+                <h4>Key Generation</h4>
+                <p class="text-muted">Generate a secure key for Poly1305 MAC</p>
+                <button id="generateKey" class="btn btn-primary mb-3">Generate Key</button>
+                <div id="keyOutput" class="d-none">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Secret Key (Keep this secure!)</label>
+                                <div class="key-text border rounded p-2" id="secretKey"></div>
+                                <button class="btn btn-sm btn-secondary mt-2"
+                                    onclick="copyToClipboard('secretKey')">Copy Key</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="file-container">
+                <h4>Generate MAC for Text</h4>
+                <form id="textMacForm">
+                    <div class="mb-3">
+                        <label class="form-label">Enter Text</label>
+                        <textarea class="form-control" id="textInput" rows="5" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Secret Key</label>
+                        <textarea class="form-control" id="textKey" rows="2" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate MAC</button>
+                </form>
+                <div id="textMacResult" class="mt-3 d-none">
+                    <div class="alert alert-success">
+                        <h5>MAC Generated</h5>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="textMacValue" readonly>
+                            <button class="btn btn-outline-secondary" type="button"
+                                onclick="copyToClipboard('textMacValue')">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="file-container">
+                <h4>Generate MAC for File</h4>
+                <form id="fileMacForm">
+                    <div class="mb-3">
+                        <label class="form-label">Select File</label>
+                        <input type="file" class="form-control" id="fileInput" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Secret Key</label>
+                        <textarea class="form-control" id="fileKey" rows="2" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate MAC</button>
+                </form>
+                <div id="fileMacResult" class="mt-3 d-none">
+                    <div class="alert alert-success">
+                        <h5>MAC Generated</h5>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="fileMacValue" readonly>
+                            <button class="btn btn-outline-secondary" type="button"
+                                onclick="copyToClipboard('fileMacValue')">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="file-container">
+                <h4>Verify MAC</h4>
+                <form id="verifyMacForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Data Type</label>
+                                <select class="form-select" id="verifyDataType">
+                                    <option value="text" selected>Text</option>
+                                    <option value="file">File</option>
+                                </select>
+                            </div>
+                            <div class="mb-3" id="verifyTextDiv">
+                                <label class="form-label">Enter Text</label>
+                                <textarea class="form-control" id="verifyText" rows="5"></textarea>
+                            </div>
+                            <div class="mb-3 d-none" id="verifyFileDiv">
+                                <label class="form-label">Select File</label>
+                                <input type="file" class="form-control" id="verifyFile">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Secret Key</label>
+                                <textarea class="form-control" id="verifyKey" rows="2" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">MAC to Verify</label>
+                                <input type="text" class="form-control" id="verifyMac" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verify MAC</button>
+                </form>
+                <div id="verifyResult" class="mt-3 d-none">
+                    <div id="verifyAlert" class="alert">
+                        <!-- Result will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="info-section">
+                <h4>About Poly1305</h4>
+                <p>Poly1305 is a cryptographic message authentication code (MAC) created by Daniel J. Bernstein in 2005.
+                    It is designed to be fast and secure, and is often used in combination with stream ciphers like
+                    ChaCha20 or Salsa20.</p>
+
+                <h5>Key Features:</h5>
+                <ul>
+                    <li><strong>Type:</strong> Universal hash function used as a MAC</li>
+                    <li><strong>Key Size:</strong> 256 bits (32 bytes), split into a 128-bit one-time key and a 128-bit
+                        AES key</li>
+                    <li><strong>Output Size:</strong> 128 bits (16 bytes)</li>
+                    <li><strong>Security:</strong> Information-theoretically secure when used with a unique key for each
+                        message</li>
+                    <li><strong>Performance:</strong> Very fast, especially on modern processors</li>
+                </ul>
+
+                <h5>How Poly1305 Works:</h5>
+                <ol>
+                    <li><strong>Key Setup:</strong> The 256-bit key is split into two parts:
+                        <ul>
+                            <li>A 128-bit one-time key r (with some bits masked off)</li>
+                            <li>A 128-bit AES key s</li>
+                        </ul>
+                    </li>
+                    <li><strong>Message Processing:</strong>
+                        <ul>
+                            <li>The message is split into 16-byte chunks</li>
+                            <li>Each chunk is interpreted as a number and has a "1" bit appended</li>
+                            <li>These numbers are used to evaluate a polynomial modulo 2^130-5</li>
+                            <li>The polynomial is evaluated using the one-time key r</li>
+                        </ul>
+                    </li>
+                    <li><strong>Finalization:</strong>
+                        <ul>
+                            <li>The result of the polynomial evaluation is added to the AES key s</li>
+                            <li>The final 16-byte MAC is produced</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h5>Common Uses:</h5>
+                <ul>
+                    <li><strong>ChaCha20-Poly1305:</strong> An AEAD (Authenticated Encryption with Associated Data)
+                        construction that combines the ChaCha20 stream cipher with Poly1305 for authentication</li>
+                    <li><strong>TLS:</strong> Used in TLS 1.2 and 1.3 as part of the ChaCha20-Poly1305 cipher suite</li>
+                    <li><strong>SSH:</strong> Used in modern SSH implementations</li>
+                    <li><strong>Signal Protocol:</strong> Used in secure messaging applications</li>
+                    <li><strong>WireGuard:</strong> Used in the WireGuard VPN protocol</li>
+                </ul>
+
+                <h5>Advantages:</h5>
+                <ul>
+                    <li><strong>Speed:</strong> Very efficient, especially on platforms without AES hardware
+                        acceleration</li>
+                    <li><strong>Security:</strong> Provides strong authentication guarantees when used correctly</li>
+                    <li><strong>Simplicity:</strong> Relatively simple design compared to some other MACs</li>
+                    <li><strong>No Padding Required:</strong> Works with messages of any length without padding</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <strong>Important Security Note:</strong> Poly1305 requires a unique key for each message. When used
+                    with ChaCha20 or other stream ciphers, this is typically achieved by deriving a message-specific key
+                    using the main key and a nonce. Reusing the same key for multiple messages can lead to forgery
+                    attacks.
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.value || element.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        // Toggle between text and file input for verification
+        document.getElementById('verifyDataType').addEventListener('change', function () {
+            const isText = this.value === 'text';
+            document.getElementById('verifyTextDiv').classList.toggle('d-none', !isText);
+            document.getElementById('verifyFileDiv').classList.toggle('d-none', isText);
+        });
+
+        document.getElementById('generateKey').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/hash/poly1305/generate-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+
+                document.getElementById('secretKey').innerText = data.key;
+                document.getElementById('keyOutput').classList.remove('d-none');
+            } catch (error) {
+                alert('Error generating key: ' + error.message);
+            }
+        });
+
+        document.getElementById('textMacForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const text = document.getElementById('textInput').value;
+            const key = document.getElementById('textKey').value;
+
+            if (!text || !key) {
+                alert('Please enter text and key');
+                return;
+            }
+
+            try {
+                const response = await fetch('/hash/poly1305/text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, key })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('textMacValue').value = data.mac;
+                document.getElementById('textMacResult').classList.remove('d-none');
+            } catch (error) {
+                alert('Error generating MAC: ' + error.message);
+            }
+        });
+
+        document.getElementById('fileMacForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = document.getElementById('fileInput').files[0];
+            const key = document.getElementById('fileKey').value;
+
+            if (!file || !key) {
+                alert('Please select a file and enter key');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('key', key);
+
+            try {
+                const response = await fetch('/hash/poly1305/file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                document.getElementById('fileMacValue').value = data.mac;
+                document.getElementById('fileMacResult').classList.remove('d-none');
+            } catch (error) {
+                alert('Error generating MAC: ' + error.message);
+            }
+        });
+
+        document.getElementById('verifyMacForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const dataType = document.getElementById('verifyDataType').value;
+            const key = document.getElementById('verifyKey').value;
+            const mac = document.getElementById('verifyMac').value;
+
+            if (!key || !mac) {
+                alert('Please enter key and MAC');
+                return;
+            }
+
+            try {
+                let response;
+
+                if (dataType === 'text') {
+                    const text = document.getElementById('verifyText').value;
+                    if (!text) {
+                        alert('Please enter text');
+                        return;
+                    }
+
+                    response = await fetch('/hash/poly1305/verify/text', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text, key, mac })
+                    });
+                } else {
+                    const file = document.getElementById('verifyFile').files[0];
+                    if (!file) {
+                        alert('Please select a file');
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('key', key);
+                    formData.append('mac', mac);
+
+                    response = await fetch('/hash/poly1305/verify/file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                const data = await response.json();
+                const verifyAlert = document.getElementById('verifyAlert');
+
+                if (data.valid) {
+                    verifyAlert.className = 'alert alert-success';
+                    verifyAlert.innerHTML = '<strong>Success!</strong> The MAC is valid. The data has not been tampered with.';
+                } else {
+                    verifyAlert.className = 'alert alert-danger';
+                    verifyAlert.innerHTML = '<strong>Warning!</strong> The MAC is invalid. The data may have been tampered with or the key is incorrect.';
+                }
+
+                document.getElementById('verifyResult').classList.remove('d-none');
+            } catch (error) {
+                alert('Error verifying MAC: ' + error.message);
+            }
+        });
+    </script>
+    {% endblock %}

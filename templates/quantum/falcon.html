@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block title %}Falcon - Quantum-Safe Digital Signatures{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Falcon - Quantum-Safe Digital Signatures</h1>
+                <p class="lead">Falcon is a lattice-based digital signature algorithm designed to be secure against quantum computer attacks.</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a Falcon key pair for signing and verification</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Security Level</label>
+                            <select class="form-select" id="securityLevel">
+                                <option value="512">Falcon-512 (NIST Level 1)</option>
+                                <option value="1024" selected>Falcon-1024 (NIST Level 5)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Key generation may take several seconds due to the complexity of the algorithm.
+                    </div>
+                    <button id="generateKeys" class="btn btn-primary mb-3">Generate Key Pair</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Private Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="privateKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Public Key (Share this with others)</label>
+                                    <div class="key-text border rounded p-2" id="publicKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Sign File</h4>
+                    <p class="text-muted">Upload a file and sign it with your private key</p>
+                    <form id="signForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Sign</label>
+                            <input type="file" class="form-control" id="signFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Private Key</label>
+                            <textarea class="form-control" id="signKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign File</button>
+                    </form>
+                    <div id="signatureOutput" class="mt-3 d-none">
+                        <div class="mb-3">
+                            <label class="form-label">Signature</label>
+                            <div class="key-text border rounded p-2" id="signature"></div>
+                            <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('signature')">Copy Signature</button>
+                            <button class="btn btn-sm btn-primary mt-2" id="downloadSignature">Download Signature</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Verify Signature</h4>
+                    <p class="text-muted">Verify a file's signature using the signer's public key</p>
+                    <form id="verifyForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Verify</label>
+                            <input type="file" class="form-control" id="verifyFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Signature</label>
+                            <textarea class="form-control" id="verifySignature" rows="3" required></textarea>
+                            <div class="form-text">Paste the signature or upload a signature file</div>
+                            <input type="file" class="form-control mt-2" id="signatureFile">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Signer's Public Key</label>
+                            <textarea class="form-control" id="verifyKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verify Signature</button>
+                    </form>
+                    <div id="verifyOutput" class="mt-3 d-none">
+                        <div id="verifyResult" class="alert">
+                            <!-- Result will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About Falcon</h4>
+                    <p>Falcon (Fast-Fourier Lattice-based Compact Signatures over NTRU) is a digital signature algorithm based on lattice cryptography. It was selected by NIST as one of the standardized post-quantum signature algorithms in 2022.</p>
+                    
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Type:</strong> Lattice-based digital signature algorithm</li>
+                        <li><strong>Security Basis:</strong> NTRU lattices and the Short Integer Solution (SIS) problem</li>
+                        <li><strong>Quantum Resistance:</strong> Designed to be secure against attacks from quantum computers</li>
+                        <li><strong>Variants:</strong> Falcon-512 (NIST Level 1) and Falcon-1024 (NIST Level 5)</li>
+                        <li><strong>Signature Size:</strong> Compact signatures (about 666 bytes for Falcon-512, 1280 bytes for Falcon-1024)</li>
+                        <li><strong>Performance:</strong> Fast verification and reasonably fast signing</li>
+                    </ul>
+                    
+                    <h5>How Falcon Works:</h5>
+                    <ol>
+                        <li><strong>Key Generation:</strong>
+                            <ul>
+                                <li>Generate an NTRU lattice with a trapdoor</li>
+                                <li>The public key is a description of the lattice</li>
+                                <li>The private key is the trapdoor information that allows efficient sampling of short vectors</li>
+                            </ul>
+                        </li>
+                        <li><strong>Signing:</strong>
+                            <ul>
+                                <li>Hash the message to a point in the lattice</li>
+                                <li>Use the private key to find a short vector that maps to this point</li>
+                                <li>This short vector is the signature</li>
+                            </ul>
+                        </li>
+                        <li><strong>Verification:</strong>
+                            <ul>
+                                <li>Hash the message to get the same point in the lattice</li>
+                                <li>Verify that the signature is a short vector that maps to this point</li>
+                                <li>Check that the signature vector is sufficiently short</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <h5>Advantages of Falcon:</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Advantage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Signature Size</td>
+                                <td>Smaller signatures compared to many other post-quantum algorithms</td>
+                            </tr>
+                            <tr>
+                                <td>Security</td>
+                                <td>Based on well-studied lattice problems with reductions to hard problems</td>
+                            </tr>
+                            <tr>
+                                <td>Performance</td>
+                                <td>Fast verification and competitive signing speed</td>
+                            </tr>
+                            <tr>
+                                <td>Standardization</td>
+                                <td>Selected by NIST for standardization, indicating high confidence in its security</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h5>Comparison with Other Post-Quantum Signature Algorithms:</h5>
+                    <ul>
+                        <li><strong>Dilithium:</strong> Another NIST-selected lattice-based signature algorithm. Dilithium has simpler implementation but larger signatures than Falcon.</li>
+                        <li><strong>SPHINCS+:</strong> A hash-based signature scheme also selected by NIST. It has very strong security assumptions but larger signatures and slower performance than Falcon.</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Falcon is primarily designed for digital signatures and cannot be used for encryption. For post-quantum encryption, algorithms like Kyber (also selected by NIST) should be used.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.innerText || element.value;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+// Read signature file when selected
+document.getElementById('signatureFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('verifySignature').value = e.target.result;
+    };
+    reader.readAsText(file);
+});
+
+document.getElementById('generateKeys').addEventListener('click', async () => {
+    try {
+        const securityLevel = document.getElementById('securityLevel').value;
+        
+        // Show loading indicator
+        document.getElementById('generateKeys').disabled = true;
+        document.getElementById('generateKeys').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+        
+        const response = await fetch('/quantum/falcon/generate-keys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ security_level: securityLevel })
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('privateKey').innerText = data.private_key;
+        document.getElementById('publicKey').innerText = data.public_key;
+        document.getElementById('keyOutput').classList.remove('d-none');
+        
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    } catch (error) {
+        alert('Error generating keys: ' + error.message);
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    }
+});
+
+document.getElementById('signForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('signFile').files[0];
+    const privateKey = document.getElementById('signKey').value;
+    
+    if (!file || !privateKey) {
+        alert('Please select a file and enter your private key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('private_key', privateKey);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#signForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing...';
+        
+        const response = await fetch('/quantum/falcon/sign', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('signature').innerText = data.signature;
+        document.getElementById('signatureOutput').classList.remove('d-none');
+        
+        // Set up download button
+        document.getElementById('downloadSignature').onclick = function() {
+            const blob = new Blob([data.signature], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name + '.falcon.sig';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        };
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Sign File';
+    } catch (error) {
+        alert('Error signing file: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#signForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Sign File';
+    }
+});
+
+document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('verifyFile').files[0];
+    const signature = document.getElementById('verifySignature').value;
+    const publicKey = document.getElementById('verifyKey').value;
+    
+    if (!file || !signature || !publicKey) {
+        alert('Please select a file, enter the signature, and enter the public key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('signature', signature);
+    formData.append('public_key', publicKey);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#verifyForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
+        
+        const response = await fetch('/quantum/falcon/verify', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        const verifyResult = document.getElementById('verifyResult');
+        
+        if (data.valid) {
+            verifyResult.className = 'alert alert-success';
+            verifyResult.innerHTML = '<strong>Valid Signature!</strong> The signature is authentic and the file has not been modified since it was signed.';
+        } else {
+            verifyResult.className = 'alert alert-danger';
+            verifyResult.innerHTML = '<strong>Invalid Signature!</strong> The signature could not be verified. Either the file has been modified, the signature is incorrect, or the wrong public key was used.';
+        }
+        
+        document.getElementById('verifyOutput').classList.remove('d-none');
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Verify Signature';
+    } catch (error) {
+        alert('Error verifying signature: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#verifyForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Verify Signature';
+    }
+});
+</script>
+{% endblock %}

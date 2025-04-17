@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+
+{% block title %}RC5 Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.file-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">RC5 Encryption</h1>
+                <p class="lead">RC5 is a symmetric-key block cipher designed by Ronald Rivest in 1994, notable for its
+                    simplicity and flexibility.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a secure key and initialization vector (IV) for RC5 encryption</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Key Length (bytes)</label>
+                            <select class="form-select" id="keyLength">
+                                <option value="8">8 bytes (64 bits)</option>
+                                <option value="16" selected>16 bytes (128 bits)</option>
+                                <option value="24">24 bytes (192 bits)</option>
+                                <option value="32">32 bytes (256 bits)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Number of Rounds</label>
+                            <select class="form-select" id="rounds">
+                                <option value="8">8 rounds</option>
+                                <option value="12" selected>12 rounds</option>
+                                <option value="16">16 rounds</option>
+                                <option value="20">20 rounds</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKey" class="btn btn-primary mb-3">Generate Key & IV</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Secret Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="secretKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('secretKey')">Copy Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initialization Vector (IV)</label>
+                                    <div class="key-text border rounded p-2" id="iv"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('iv')">Copy
+                                        IV</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with RC5</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initialization Vector (IV)</label>
+                            <textarea class="form-control" id="encryptIV" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of Rounds</label>
+                            <select class="form-select" id="encryptRounds">
+                                <option value="8">8 rounds</option>
+                                <option value="12" selected>12 rounds</option>
+                                <option value="16">16 rounds</option>
+                                <option value="20">20 rounds</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with RC5</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secret Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initialization Vector (IV)</label>
+                            <textarea class="form-control" id="decryptIV" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of Rounds</label>
+                            <select class="form-select" id="decryptRounds">
+                                <option value="8">8 rounds</option>
+                                <option value="12" selected>12 rounds</option>
+                                <option value="16">16 rounds</option>
+                                <option value="20">20 rounds</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About RC5 Encryption</h4>
+                    <p>RC5 is a symmetric-key block cipher designed by Ronald Rivest in 1994. It is notable for its
+                        simplicity and flexibility, with variable parameters including word size, number of rounds, and
+                        key size.</p>
+
+                    <h5>Key Features:</h5>
+                    <ul>
+                        <li><strong>Block Size:</strong> Variable (32, 64, or 128 bits)</li>
+                        <li><strong>Key Size:</strong> Variable (0 to 2040 bits)</li>
+                        <li><strong>Rounds:</strong> Variable (0 to 255)</li>
+                        <li><strong>Structure:</strong> Feistel-like network with data-dependent rotations</li>
+                        <li><strong>Operations:</strong> Addition, XOR, and rotation</li>
+                    </ul>
+
+                    <h5>How RC5 Works:</h5>
+                    <ol>
+                        <li><strong>Key Expansion:</strong> The variable-length key is expanded into a subkey table</li>
+                        <li><strong>Data-Dependent Rotations:</strong> RC5 uses rotations where the rotation amount
+                            depends on the data being encrypted</li>
+                        <li><strong>Simple Operations:</strong> The algorithm uses only three operations: XOR, addition
+                            modulo 2^w, and rotation</li>
+                    </ol>
+
+                    <h5>Advantages:</h5>
+                    <ul>
+                        <li>Simple and elegant design</li>
+                        <li>Flexible parameters for different security/performance needs</li>
+                        <li>Efficient implementation in both software and hardware</li>
+                        <li>Data-dependent rotations provide strong diffusion</li>
+                    </ul>
+
+                    <h5>Disadvantages:</h5>
+                    <ul>
+                        <li>Patented until 2015 (now free to use)</li>
+                        <li>Some variants with fewer rounds have been broken</li>
+                        <li>Not as widely used as AES in modern applications</li>
+                    </ul>
+
+                    <h5>Common Parameters:</h5>
+                    <ul>
+                        <li><strong>RC5-32/12/16:</strong> 32-bit words, 12 rounds, 16-byte (128-bit) key</li>
+                        <li><strong>RC5-32/16/16:</strong> 32-bit words, 16 rounds, 16-byte (128-bit) key</li>
+                        <li><strong>RC5-64/16/16:</strong> 64-bit words, 16 rounds, 16-byte (128-bit) key</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKey').addEventListener('click', async () => {
+        try {
+            const keyLength = document.getElementById('keyLength').value;
+            const rounds = document.getElementById('rounds').value;
+            const response = await fetch('/generate-rc5-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    key_length: keyLength,
+                    rounds: rounds
+                })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('secretKey').innerText = data.key;
+            document.getElementById('iv').innerText = data.iv;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating key: ' + error.message);
+        }
+    });
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('file', document.getElementById('encryptFile').files[0]);
+        formData.append('key', document.getElementById('encryptKey').value.trim());
+        formData.append('iv', document.getElementById('encryptIV').value.trim());
+        formData.append('rounds', document.getElementById('encryptRounds').value);
+
+        try {
+            const response = await fetch('/symmetric/rc5/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'rc5_encrypted_' + document.getElementById('encryptFile').files[0].name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('decryptFile').files[0];
+        const key = document.getElementById('decryptKey').value.trim();
+        const iv = document.getElementById('decryptIV').value.trim();
+        const rounds = document.getElementById('decryptRounds').value;
+
+        if (!file || !key || !iv) {
+            alert('Please select a file and enter the key and IV');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('key', key);
+        formData.append('iv', iv);
+        formData.append('rounds', rounds);
+
+        try {
+            const response = await fetch('/symmetric/rc5/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('rc5_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

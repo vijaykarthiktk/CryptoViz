@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block title %}Argon2 Hash{% endblock %}
+
+{% block additional_styles %}
+.hash-result {
+font-family: monospace;
+font-size: 1.2rem;
+word-break: break-all;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Argon2 Password Hashing</h1>
+
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">About Argon2</h2>
+                    <p class="card-text">
+                        Argon2 is a key derivation function that was selected as the winner of the Password Hashing
+                        Competition in July 2015. It was designed by Alex Biryukov, Daniel Dinu, and Dmitry Khovratovich
+                        from the University of Luxembourg.
+                    </p>
+                    <h3>Key Features:</h3>
+                    <ul>
+                        <li><strong>Memory-Hard:</strong> Designed to use a large amount of memory, making it resistant
+                            to attacks using specialized hardware like GPUs and ASICs</li>
+                        <li><strong>Tunable Parameters:</strong> Allows adjusting memory usage, computation time, and
+                            parallelism to suit different security requirements</li>
+                        <li><strong>Multiple Variants:</strong> Comes in three variants (Argon2d, Argon2i, Argon2id)
+                            with different security properties</li>
+                        <li><strong>Modern Design:</strong> Incorporates lessons learned from previous password hashing
+                            functions</li>
+                        <li><strong>Salt Support:</strong> Uses random salts to prevent precomputed table attacks</li>
+                    </ul>
+                    <h3>Advantages:</h3>
+                    <ul>
+                        <li>Stronger security against hardware-based attacks compared to older algorithms</li>
+                        <li>Highly configurable to balance security and performance</li>
+                        <li>Winner of the Password Hashing Competition</li>
+                        <li>Recommended by security experts and organizations like OWASP</li>
+                        <li>Suitable for a wide range of applications from web services to high-security systems</li>
+                    </ul>
+                    <h3>Recommended Parameters:</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Use Case</th>
+                                <th>Variant</th>
+                                <th>Memory Cost</th>
+                                <th>Time Cost</th>
+                                <th>Parallelism</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Web Applications</td>
+                                <td>Argon2id</td>
+                                <td>32 MB</td>
+                                <td>2</td>
+                                <td>2</td>
+                            </tr>
+                            <tr>
+                                <td>High Security</td>
+                                <td>Argon2id</td>
+                                <td>64-128 MB</td>
+                                <td>3-4</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>Resource Constrained</td>
+                                <td>Argon2id</td>
+                                <td>16 MB</td>
+                                <td>1</td>
+                                <td>1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="alert alert-info">
+                        <strong>Security Best Practice:</strong> Argon2id is currently recommended as the best choice
+                        for
+                        password hashing. It provides a good balance between resistance to side-channel attacks and
+                        GPU/ASIC
+                        attacks.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Generate Argon2 Hash</h2>
+                    <form id="hashForm">
+                        <div class="mb-3">
+                            <label for="passwordInput" class="form-label">Password:</label>
+                            <input type="password" class="form-control" id="passwordInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="variant" class="form-label">Argon2 Variant:</label>
+                            <select class="form-select" id="variant">
+                                <option value="argon2id" selected>Argon2id (Recommended)</option>
+                                <option value="argon2i">Argon2i (Memory-hard)</option>
+                                <option value="argon2d">Argon2d (Fastest)</option>
+                            </select>
+                            <div class="form-text">Argon2id is the recommended variant for most use cases.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memoryCost" class="form-label">Memory Cost (KiB):</label>
+                            <select class="form-select" id="memoryCost">
+                                <option value="16384">16 MB</option>
+                                <option value="32768" selected>32 MB (Recommended)</option>
+                                <option value="65536">64 MB</option>
+                                <option value="131072">128 MB (Stronger)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timeCost" class="form-label">Time Cost (Iterations):</label>
+                            <select class="form-select" id="timeCost">
+                                <option value="1">1 (Faster)</option>
+                                <option value="2" selected>2 (Recommended)</option>
+                                <option value="3">3</option>
+                                <option value="4">4 (Stronger)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="parallelism" class="form-label">Parallelism:</label>
+                            <select class="form-select" id="parallelism">
+                                <option value="1">1 (Single thread)</option>
+                                <option value="2" selected>2 (Recommended)</option>
+                                <option value="4">4</option>
+                                <option value="8">8 (Multi-core)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Generate Hash</button>
+                        <div id="hashResult" class="mt-3 d-none">
+                            <h5>Argon2 Hash:</h5>
+                            <div class="input-group">
+                                <textarea class="form-control hash-result" id="hashValue" rows="3" readonly></textarea>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="copyToClipboard('hashValue')">Copy</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Verify Password</h2>
+                    <form id="verifyForm">
+                        <div class="mb-3">
+                            <label for="verifyPassword" class="form-label">Password:</label>
+                            <input type="password" class="form-control" id="verifyPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="verifyHash" class="form-label">Argon2 Hash:</label>
+                            <textarea class="form-control" id="verifyHash" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verify Password</button>
+                        <div id="verifyResult" class="mt-3 d-none">
+                            <div class="alert" id="verifyAlert"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">How Argon2 Works</h2>
+                    <p>Argon2 is a memory-hard password hashing function that uses a sophisticated approach to resist
+                        various attacks.</p>
+
+                    <h3>Core Operation:</h3>
+                    <ol>
+                        <li>Initialize memory blocks with the password, salt, and other parameters</li>
+                        <li>Perform multiple passes over the memory to create dependencies between blocks</li>
+                        <li>Extract the final hash value from the memory state</li>
+                    </ol>
+
+                    <h3>Variant Differences:</h3>
+                    <ul>
+                        <li><strong>Argon2d:</strong> Data-dependent memory access pattern - faster but vulnerable to
+                            side-channel attacks</li>
+                        <li><strong>Argon2i:</strong> Data-independent memory access pattern - more resistant to
+                            side-channel attacks</li>
+                        <li><strong>Argon2id:</strong> Hybrid approach - first half uses Argon2i, second half uses
+                            Argon2d</li>
+                    </ul>
+
+                    <h3>Comparison with Other Password Hashing Functions:</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Advantages</th>
+                                <th>Disadvantages</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Argon2</td>
+                                <td>
+                                    <ul>
+                                        <li>Modern design with strong security</li>
+                                        <li>Memory-hard (resistant to hardware attacks)</li>
+                                        <li>Highly tunable parameters</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li>Newer, less battle-tested</li>
+                                        <li>More complex to implement correctly</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Bcrypt</td>
+                                <td>
+                                    <ul>
+                                        <li>Well-established and widely used</li>
+                                        <li>Simple to use with good library support</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li>Limited memory hardness</li>
+                                        <li>Fixed memory usage (128 KB)</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>PBKDF2</td>
+                                <td>
+                                    <ul>
+                                        <li>Widely supported in many platforms</li>
+                                        <li>NIST approved</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li>Not memory-hard</li>
+                                        <li>Vulnerable to GPU/ASIC attacks</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-warning mt-3">
+                        <strong>Note:</strong> This is a simplified explanation. The actual implementation involves
+                        complex mathematical operations and careful parameter selection to ensure security.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        element.select();
+        document.execCommand('copy');
+        alert('Copied to clipboard!');
+    }
+
+    document.getElementById('hashForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const password = document.getElementById('passwordInput').value;
+        const variant = document.getElementById('variant').value;
+        const memoryCost = document.getElementById('memoryCost').value;
+        const timeCost = document.getElementById('timeCost').value;
+        const parallelism = document.getElementById('parallelism').value;
+
+        try {
+            const response = await fetch('/hash/argon2/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    password: password,
+                    variant: variant.replace('argon2', ''),
+                    memory_cost: memoryCost,
+                    time_cost: timeCost,
+                    parallelism: parallelism
+                })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('hashValue').value = data.hash;
+            document.getElementById('hashResult').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating hash: ' + error.message);
+        }
+    });
+
+    document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const password = document.getElementById('verifyPassword').value;
+        const hash = document.getElementById('verifyHash').value;
+
+        try {
+            const response = await fetch('/hash/argon2/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    password: password,
+                    hash: hash
+                })
+            });
+
+            const data = await response.json();
+            const verifyResult = document.getElementById('verifyResult');
+            const verifyAlert = document.getElementById('verifyAlert');
+
+            verifyResult.classList.remove('d-none');
+
+            if (data.match) {
+                verifyAlert.className = 'alert alert-success';
+                verifyAlert.textContent = 'Password matches the hash! Authentication successful.';
+            } else {
+                verifyAlert.className = 'alert alert-danger';
+                verifyAlert.textContent = 'Password does not match the hash! Authentication failed.';
+            }
+        } catch (error) {
+            alert('Error verifying password: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

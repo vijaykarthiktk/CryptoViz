@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+
+{% block title %}SIKE - Quantum-Safe Key Exchange{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.file-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">SIKE - Supersingular Isogeny Key Encapsulation</h1>
+                <p class="lead">SIKE is an isogeny-based key encapsulation mechanism designed to be secure against quantum computer attacks.</p>
+                <div class="alert alert-warning">
+                    <strong>Security Notice:</strong> In 2022, researchers discovered an attack against SIKE that breaks its security. While this page is provided for educational purposes, SIKE is no longer recommended for secure applications. Please consider using other post-quantum algorithms like Kyber or BIKE instead.
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Generation</h4>
+                    <p class="text-muted">Generate a SIKE key pair for key encapsulation</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Parameter Set</label>
+                            <select class="form-select" id="parameterSet">
+                                <option value="sikep434">SIKEp434 (NIST Level 1)</option>
+                                <option value="sikep503" selected>SIKEp503 (NIST Level 2)</option>
+                                <option value="sikep610">SIKEp610 (NIST Level 3)</option>
+                                <option value="sikep751">SIKEp751 (NIST Level 5)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="generateKeys" class="btn btn-primary mb-3">Generate Key Pair</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Private Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="privateKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Public Key (Share this with others)</label>
+                                    <div class="key-text border rounded p-2" id="publicKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with recipient's public key</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Recipient's Public Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Parameter Set</label>
+                            <select class="form-select" id="encryptParameterSet">
+                                <option value="sikep434">SIKEp434 (NIST Level 1)</option>
+                                <option value="sikep503" selected>SIKEp503 (NIST Level 2)</option>
+                                <option value="sikep610">SIKEp610 (NIST Level 3)</option>
+                                <option value="sikep751">SIKEp751 (NIST Level 5)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with your private key</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Private Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Parameter Set</label>
+                            <select class="form-select" id="decryptParameterSet">
+                                <option value="sikep434">SIKEp434 (NIST Level 1)</option>
+                                <option value="sikep503" selected>SIKEp503 (NIST Level 2)</option>
+                                <option value="sikep610">SIKEp610 (NIST Level 3)</option>
+                                <option value="sikep751">SIKEp751 (NIST Level 5)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About SIKE</h4>
+                    <p>SIKE (Supersingular Isogeny Key Encapsulation) is an isogeny-based key encapsulation mechanism that was a candidate in the NIST Post-Quantum Cryptography standardization process. It is based on the mathematics of isogenies between supersingular elliptic curves.</p>
+                    
+                    <div class="alert alert-danger mb-4">
+                        <h5 class="alert-heading">Security Status</h5>
+                        <p>In July 2022, researchers Wouter Castryck and Thomas Decru published an attack that breaks SIKE's security. The attack uses techniques from number theory to efficiently recover the private key from the public key. As a result, SIKE is no longer considered secure for cryptographic applications.</p>
+                        <p class="mb-0">This page is maintained for educational purposes only. For secure post-quantum cryptography, please use NIST-recommended algorithms like Kyber, Dilithium, Falcon, or SPHINCS+.</p>
+                    </div>
+                    
+                    <h5>Key Features (Historical):</h5>
+                    <ul>
+                        <li><strong>Type:</strong> Isogeny-based key encapsulation mechanism (KEM)</li>
+                        <li><strong>Security Basis:</strong> Supersingular Isogeny Diffie-Hellman (SIDH) problem</li>
+                        <li><strong>Key Sizes:</strong> Very compact public and private keys compared to other post-quantum algorithms</li>
+                        <li><strong>Parameter Sets:</strong> SIKEp434, SIKEp503, SIKEp610, SIKEp751 (named after the prime field size)</li>
+                    </ul>
+                    
+                    <h5>How SIKE Works (Conceptual Overview):</h5>
+                    <ol>
+                        <li><strong>Key Generation:</strong>
+                            <ul>
+                                <li>Generate a random private key (a secret integer)</li>
+                                <li>Compute an isogeny (a special mapping between elliptic curves) using this private key</li>
+                                <li>The public key consists of information about the resulting curve and some auxiliary points</li>
+                            </ul>
+                        </li>
+                        <li><strong>Encapsulation:</strong>
+                            <ul>
+                                <li>Generate a random secret value</li>
+                                <li>Compute an isogeny using this secret value and the recipient's public key</li>
+                                <li>Derive a shared secret from the resulting curve</li>
+                                <li>The ciphertext contains information needed to compute the same shared secret</li>
+                            </ul>
+                        </li>
+                        <li><strong>Decapsulation:</strong>
+                            <ul>
+                                <li>Use the private key to compute the same shared secret from the ciphertext</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <h5>Historical Advantages:</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Advantage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Key Size</td>
+                                <td>Very small public and private keys compared to other post-quantum algorithms</td>
+                            </tr>
+                            <tr>
+                                <td>Ciphertext Size</td>
+                                <td>Compact ciphertexts</td>
+                            </tr>
+                            <tr>
+                                <td>Mathematical Structure</td>
+                                <td>Based on different mathematical principles than other post-quantum approaches, providing diversity</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h5>The Attack (2022):</h5>
+                    <p>The attack that broke SIKE uses techniques from number theory, specifically torsion point attacks. The key insights:</p>
+                    <ul>
+                        <li>The attack exploits the special structure of supersingular elliptic curves</li>
+                        <li>It uses the fact that certain auxiliary points reveal information about the private key</li>
+                        <li>The attack can recover the private key with only a few queries to an oracle</li>
+                        <li>The computational complexity is much lower than expected, making it practical to execute</li>
+                    </ul>
+                    
+                    <h5>Lessons Learned:</h5>
+                    <ul>
+                        <li><strong>Cryptographic Diversity:</strong> The failure of SIKE highlights the importance of having multiple post-quantum approaches</li>
+                        <li><strong>Cryptanalysis Value:</strong> Demonstrates the value of continued cryptanalysis of candidate algorithms</li>
+                        <li><strong>Mathematical Foundations:</strong> Shows that seemingly secure mathematical problems can sometimes have unexpected weaknesses</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> While SIKE is no longer secure, research in isogeny-based cryptography continues. Future isogeny-based schemes may address the weaknesses discovered in SIKE and provide secure alternatives.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.innerText || element.value;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+// Sync parameter set selections
+document.getElementById('parameterSet').addEventListener('change', function() {
+    document.getElementById('encryptParameterSet').value = this.value;
+    document.getElementById('decryptParameterSet').value = this.value;
+});
+
+document.getElementById('generateKeys').addEventListener('click', async () => {
+    try {
+        const parameterSet = document.getElementById('parameterSet').value;
+        
+        // Show loading indicator
+        document.getElementById('generateKeys').disabled = true;
+        document.getElementById('generateKeys').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+        
+        const response = await fetch('/quantum/sike/generate-keys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ parameter_set: parameterSet })
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('privateKey').innerText = data.private_key;
+        document.getElementById('publicKey').innerText = data.public_key;
+        document.getElementById('keyOutput').classList.remove('d-none');
+        
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    } catch (error) {
+        alert('Error generating keys: ' + error.message);
+        // Reset button
+        document.getElementById('generateKeys').disabled = false;
+        document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+    }
+});
+
+document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('encryptFile').files[0];
+    const publicKey = document.getElementById('encryptKey').value;
+    const parameterSet = document.getElementById('encryptParameterSet').value;
+    
+    if (!file || !publicKey) {
+        alert('Please select a file and enter the public key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('public_key', publicKey);
+    formData.append('parameter_set', parameterSet);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#encryptForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Encrypting...';
+        
+        const response = await fetch('/quantum/sike/encrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sike_encrypted_' + file.name;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to encrypt file');
+        }
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Encrypt & Download';
+    } catch (error) {
+        alert('Error encrypting file: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#encryptForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Encrypt & Download';
+    }
+});
+
+document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('decryptFile').files[0];
+    const privateKey = document.getElementById('decryptKey').value;
+    const parameterSet = document.getElementById('decryptParameterSet').value;
+    
+    if (!file || !privateKey) {
+        alert('Please select a file and enter your private key');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('private_key', privateKey);
+    formData.append('parameter_set', parameterSet);
+    
+    try {
+        // Show loading indicator
+        const submitBtn = document.querySelector('#decryptForm button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Decrypting...';
+        
+        const response = await fetch('/quantum/sike/decrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'decrypted_' + file.name.replace('sike_encrypted_', '');
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to decrypt file');
+        }
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Decrypt & Download';
+    } catch (error) {
+        alert('Error decrypting file: ' + error.message);
+        // Reset button
+        const submitBtn = document.querySelector('#decryptForm button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Decrypt & Download';
+    }
+});
+</script>
+{% endblock %}

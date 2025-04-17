@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}RSA Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+.file-container {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+.info-section {
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+margin-top: 30px;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">RSA Encryption</h1>
+                <p class="lead">RSA (Rivest–Shamir–Adleman) is a public-key cryptosystem that is widely used for secure
+                    data transmission.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="key-container">
+                    <h4>Key Management</h4>
+                    <p class="text-muted">Generate a new key pair for encryption and decryption</p>
+                    <button id="generateKeys" class="btn btn-primary mb-3">Generate Key Pair</button>
+                    <div id="keyOutput" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Private Key (Keep this secure!)</label>
+                                    <div class="key-text border rounded p-2" id="privateKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('privateKey')">Copy Private Key</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Public Key (Share this with others)</label>
+                                    <div class="key-text border rounded p-2" id="publicKey"></div>
+                                    <button class="btn btn-sm btn-secondary mt-2"
+                                        onclick="copyToClipboard('publicKey')">Copy Public Key</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Encrypt File</h4>
+                    <p class="text-muted">Upload a file and encrypt it with your private key</p>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">File to Encrypt</label>
+                            <input type="file" class="form-control" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Private Key</label>
+                            <textarea class="form-control" id="encryptKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Encrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="file-container">
+                    <h4>Decrypt File</h4>
+                    <p class="text-muted">Upload an encrypted file and decrypt it with the sender's public key</p>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label class="form-label">Encrypted File</label>
+                            <input type="file" class="form-control" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sender's Public Key</label>
+                            <textarea class="form-control" id="decryptKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Decrypt & Download</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>About RSA Encryption</h4>
+                    <p>RSA is one of the first public-key cryptosystems and is widely used for secure data transmission.
+                        In RSA cryptography:</p>
+                    <ul>
+                        <li>The encryption key is public and distinct from the decryption key, which is kept private.
+                        </li>
+                        <li>RSA is based on the practical difficulty of factoring the product of two large prime
+                            numbers.</li>
+                        <li>The security of RSA relies on the fact that finding the prime factors of a large composite
+                            number is computationally intensive.</li>
+                    </ul>
+                    <h5>How RSA Works:</h5>
+                    <ol>
+                        <li>Generate two large prime numbers, p and q.</li>
+                        <li>Compute n = p × q.</li>
+                        <li>Compute the totient: φ(n) = (p-1) × (q-1).</li>
+                        <li>Choose an integer e such that 1 < e < φ(n) and gcd(e, φ(n))=1.</li>
+                        <li>Compute d such that d × e ≡ 1 (mod φ(n)).</li>
+                        <li>The public key is (n, e) and the private key is (n, d).</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    document.getElementById('generateKeys').addEventListener('click', async () => {
+        try {
+            // Show loading indicator
+            document.getElementById('generateKeys').disabled = true;
+            document.getElementById('generateKeys').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+
+            const response = await fetch('/asymmetric/rsa/generate-keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            const data = await response.json();
+
+            document.getElementById('privateKey').innerText = data.private_key;
+            document.getElementById('publicKey').innerText = data.public_key;
+            document.getElementById('keyOutput').classList.remove('d-none');
+
+            // Reset button
+            document.getElementById('generateKeys').disabled = false;
+            document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+        } catch (error) {
+            alert('Error generating keys: ' + error.message);
+            // Reset button
+            document.getElementById('generateKeys').disabled = false;
+            document.getElementById('generateKeys').innerHTML = 'Generate Key Pair';
+        }
+    });
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('encryptFile').files[0];
+        const privateKey = document.getElementById('encryptKey').value;
+
+        if (!file || !privateKey) {
+            alert('Please select a file and enter your private key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('private_key', privateKey);
+
+        try {
+            const response = await fetch('/asymmetric/rsa/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'rsa_encrypted_' + file.name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('decryptFile').files[0];
+        const publicKey = document.getElementById('decryptKey').value;
+
+        if (!file || !publicKey) {
+            alert('Please select a file and enter the sender\'s public key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('public_key', publicKey);
+
+        try {
+            const response = await fetch('/asymmetric/rsa/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('rsa_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}

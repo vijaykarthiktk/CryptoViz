@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}McEliece Encryption{% endblock %}
+
+{% block additional_styles %}
+.key-text {
+font-family: monospace;
+white-space: pre-wrap;
+word-break: break-all;
+max-height: 150px;
+overflow-y: auto;
+}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">McEliece Encryption</h1>
+
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">About McEliece</h2>
+                    <p class="card-text">
+                        The McEliece cryptosystem is one of the oldest public-key cryptosystems, proposed by Robert
+                        McEliece in 1978. It is based on the hardness of decoding a general linear code, a problem from
+                        coding theory. Unlike RSA and ECC, McEliece is believed to be resistant to attacks using quantum
+                        computers.
+                    </p>
+                    <h3>Key Features:</h3>
+                    <ul>
+                        <li><strong>Type:</strong> Code-based asymmetric encryption algorithm</li>
+                        <li><strong>Security Basis:</strong> Hardness of decoding general linear codes (NP-hard problem)
+                        </li>
+                        <li><strong>Quantum Resistance:</strong> Believed to be secure against quantum computer attacks
+                        </li>
+                        <li><strong>Key Sizes:</strong> Public keys are typically large (hundreds of kilobytes to
+                            several megabytes)</li>
+                        <li><strong>Performance:</strong> Fast encryption and decryption operations compared to other
+                            post-quantum algorithms</li>
+                    </ul>
+                    <h3>Advantages:</h3>
+                    <ul>
+                        <li>Resistant to quantum computer attacks</li>
+                        <li>Fast encryption and decryption operations</li>
+                        <li>Based on a well-studied mathematical problem</li>
+                        <li>Has withstood cryptanalysis for over 40 years</li>
+                    </ul>
+                    <h3>Applications:</h3>
+                    <ul>
+                        <li>Long-term secure communications</li>
+                        <li>Data protection against future quantum attacks</li>
+                        <li>Hybrid encryption schemes</li>
+                        <li>Post-quantum cryptography standards</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> McEliece is primarily used for encryption rather than digital signatures.
+                        For post-quantum digital signatures, other algorithms like Dilithium, Falcon, or SPHINCS+ are
+                        typically used.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Generate McEliece Keys</h2>
+                    <div class="mb-3">
+                        <label for="securityLevel" class="form-label">Security Level:</label>
+                        <select class="form-select" id="securityLevel">
+                            <option value="mceliece348864">McEliece-348864 (128-bit security)</option>
+                            <option value="mceliece460896" selected>McEliece-460896 (192-bit security)</option>
+                            <option value="mceliece6960119">McEliece-6960119 (256-bit security)</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Key generation may take several seconds due to
+                        the complexity of the algorithm.
+                    </div>
+                    <div class="mb-3">
+                        <button id="generateKeys" class="btn btn-primary">Generate Keys</button>
+                    </div>
+                    <div id="keyOutput" class="d-none">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Public Key:</strong></label>
+                            <div class="input-group">
+                                <textarea class="form-control" id="publicKey" rows="3" readonly></textarea>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="copyToClipboard('publicKey')">Copy</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Private Key:</strong></label>
+                            <div class="input-group">
+                                <textarea class="form-control" id="privateKey" rows="3" readonly></textarea>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="copyToClipboard('privateKey')">Copy</button>
+                            </div>
+                            <div class="form-text text-danger">Keep your private key secret! Never share it with anyone.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Encrypt File with McEliece</h2>
+                    <form id="encryptForm">
+                        <div class="mb-3">
+                            <label for="encryptFile" class="form-label">Select File to Encrypt:</label>
+                            <input class="form-control" type="file" id="encryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="encryptKey" class="form-label">Recipient's Public Key:</label>
+                            <textarea class="form-control" id="encryptKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Encrypt File</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Decrypt McEliece File</h2>
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label for="decryptFile" class="form-label">Select Encrypted File:</label>
+                            <input class="form-control" type="file" id="decryptFile" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="decryptKey" class="form-label">Your Private Key:</label>
+                            <textarea class="form-control" id="decryptKey" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Decrypt File</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">How McEliece Works</h2>
+                    <p>McEliece is a code-based asymmetric encryption algorithm that uses error-correcting codes to
+                        provide security.</p>
+
+                    <h3>Key Generation:</h3>
+                    <ol>
+                        <li>Choose a binary Goppa code with parameters [n,k,t] that can correct t errors</li>
+                        <li>Generate a k×n generator matrix G for this code</li>
+                        <li>Choose a random k×k invertible matrix S</li>
+                        <li>Choose a random n×n permutation matrix P</li>
+                        <li>Compute G' = SGP (the "scrambled" generator matrix)</li>
+                        <li>Public key: (G', t)</li>
+                        <li>Private key: (S, G, P)</li>
+                    </ol>
+
+                    <h3>Encryption:</h3>
+                    <ol>
+                        <li>Convert the message to a binary vector m of length k</li>
+                        <li>Generate a random error vector e of length n with exactly t 1's</li>
+                        <li>Compute the ciphertext c = mG' + e</li>
+                    </ol>
+
+                    <h3>Decryption:</h3>
+                    <ol>
+                        <li>Compute c' = cP^(-1)</li>
+                        <li>Use the decoding algorithm for the Goppa code to remove the error and recover m'</li>
+                        <li>Compute the original message m = m'S^(-1)</li>
+                    </ol>
+
+                    <h3>Advantages and Disadvantages:</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Advantages</th>
+                                <th>Disadvantages</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <ul>
+                                        <li>Resistant to quantum computer attacks</li>
+                                        <li>Fast encryption and decryption operations</li>
+                                        <li>Based on a well-studied mathematical problem</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li>Very large public keys</li>
+                                        <li>Ciphertext expansion</li>
+                                        <li>Less widely implemented than RSA or ECC</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-warning mt-3">
+                        <strong>Note:</strong> This is a simplified explanation. The actual implementation involves
+                        complex mathematical operations and careful parameter selection to ensure security.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        element.select();
+        document.execCommand('copy');
+        alert('Copied to clipboard!');
+    }
+
+    document.getElementById('generateKeys').addEventListener('click', async () => {
+        try {
+            const securityLevel = document.getElementById('securityLevel').value;
+
+            const response = await fetch('/quantum/mceliece/generate-keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ parameter_set: securityLevel })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('publicKey').value = data.public_key;
+            document.getElementById('privateKey').value = data.private_key;
+            document.getElementById('keyOutput').classList.remove('d-none');
+        } catch (error) {
+            alert('Error generating keys: ' + error.message);
+        }
+    });
+
+    document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('encryptFile').files[0];
+        const publicKey = document.getElementById('encryptKey').value;
+
+        if (!file || !publicKey) {
+            alert('Please select a file and enter the public key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('public_key', publicKey);
+
+        try {
+            // Show loading indicator
+            const submitBtn = document.querySelector('#encryptForm button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Encrypting...';
+
+            const response = await fetch('/asymmetric/mceliece/encrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'mceliece_encrypted_' + file.name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to encrypt file');
+            }
+
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Encrypt & Download';
+        } catch (error) {
+            alert('Error encrypting file: ' + error.message);
+            // Reset button
+            const submitBtn = document.querySelector('#encryptForm button[type="submit"]');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Encrypt & Download';
+        }
+    });
+
+    document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('decryptFile').files[0];
+        const privateKey = document.getElementById('decryptKey').value;
+
+        if (!file || !privateKey) {
+            alert('Please select a file and enter your private key');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('private_key', privateKey);
+
+        try {
+            // Show loading indicator
+            const submitBtn = document.querySelector('#decryptForm button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Decrypting...';
+
+            const response = await fetch('/asymmetric/mceliece/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_' + file.name.replace('mceliece_encrypted_', '');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to decrypt file');
+            }
+
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Decrypt & Download';
+        } catch (error) {
+            alert('Error decrypting file: ' + error.message);
+            // Reset button
+            const submitBtn = document.querySelector('#decryptForm button[type="submit"]');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Decrypt & Download';
+        }
+    });
+</script>
+{% endblock %}
