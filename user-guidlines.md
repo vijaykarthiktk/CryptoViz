@@ -1,0 +1,1 @@
+Need About, How it Works,  Key Features and a small note inside one sectino for all algorithams Created. this need to be bellow the algoritham implementation. Every Algoritham need to be added to Nav bar in appropriate section. Dont create duplicate files for same algorithams
